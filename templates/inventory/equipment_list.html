@@ -1,0 +1,71 @@
+{% extends "inventory/base.html" %}
+{% block content %}
+<div class="page-header">
+    <h1>💻 Оборудование</h1>
+    <div class="btn-group">
+        {% if user.is_staff or perms.inventory.change_equipment %}
+        <a href="{% url 'equipment_add' %}" class="btn btn-primary">+ Добавить</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <form method="get" style="margin-bottom: 16px;">
+        <div class="search-bar">
+            <input type="text" name="q" class="form-control" placeholder="Поиск по номеру, наименованию, помещению..." value="{{ q }}" data-search>
+        </div>
+    </form>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Инв. номер</th>
+                    <th>Наименование</th>
+                    <th>Тип</th>
+                    <th>Статус</th>
+                    <th>Местоположение</th>
+                    <th>Эксплуатация</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for eq in equipment_list %}
+                <tr>
+                    <td><a href="{% url 'equipment_detail' eq.pk %}">{{ eq.inventory_number }}</a></td>
+                    <td>{{ eq.name }}</td>
+                    <td>{{ eq.equipment_type }}</td>
+                    <td><span class="badge badge-{{ eq.status }}">{{ eq.get_status_display }}</span></td>
+                    <td>{{ eq.location|default:"—" }}</td>
+                    <td>{{ eq.operator|default:"—" }}</td>
+                    <td>
+                        <div class="btn-group">
+                            {% if user.is_staff or perms.inventory.change_equipment %}
+                            <a href="{% url 'equipment_edit' eq.pk %}" class="btn btn-sm btn-outline">✏️</a>
+                            {% endif %}
+                            {% if user.is_staff %}
+                            <a href="{% url 'equipment_delete' eq.pk %}" class="btn btn-sm btn-danger">🗑️</a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" style="text-align:center; color:var(--text-muted);">Нет записей</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page=1{% if q %}&q={{ q }}{% endif %}">&laquo;</a>
+        <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}">&lsaquo;</a>
+        {% endif %}
+        <span class="current">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}">&rsaquo;</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}{% if q %}&q={{ q }}{% endif %}">&raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

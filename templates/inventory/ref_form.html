@@ -1,0 +1,20 @@
+{% extends "inventory/base.html" %}
+{% block content %}
+<div class="page-header">
+    <h1>{% if form.instance.pk %}✏️ Редактировать{% else %}➕ Добавить{% endif %} {{ ref_name|lower }}</h1>
+    <a href="{% url ref_url|add:'_list' %}" class="btn btn-outline">← Назад</a>
+</div>
+
+<div class="card">
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-group">
+            <label>{{ field.label }}</label>
+            {{ field }}
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">💾 Сохранить</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "inventory/base.html" %}
+{% block content %}
+<div class="page-header">
+    <h1>{% if form.instance.pk %}✏️ Редактировать{% else %}➕ Добавить{% endif %} расходник</h1>
+    <a href="{% url 'consumable_list' %}" class="btn btn-outline">← Назад</a>
+</div>
+
+<div class="card">
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-row">
+            <div class="form-group">
+                <label>{{ form.equipment_type.label }}</label>
+                {{ form.equipment_type }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.name.label }}</label>
+                {{ form.name }}
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>{{ form.quantity.label }}</label>
+                {{ form.quantity }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.location.label }}</label>
+                {{ form.location }}
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">💾 Сохранить</button>
+    </form>
+</div>
+{% endblock %}

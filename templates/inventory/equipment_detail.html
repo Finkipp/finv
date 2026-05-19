@@ -1,0 +1,47 @@
+{% extends "inventory/base.html" %}
+{% block content %}
+<div class="page-header">
+    <h1>💻 {{ eq.name }}</h1>
+    <div class="btn-group">
+        {% if user.is_staff or perms.inventory.change_equipment %}
+        <a href="{% url 'equipment_edit' eq.pk %}" class="btn btn-primary">✏️ Редактировать</a>
+        {% endif %}
+        <a href="{% url 'equipment_list' %}" class="btn btn-outline">← Назад</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="detail-grid">
+        <div class="detail-item">
+            <label>Инвентарный номер</label>
+            <div class="value">{{ eq.inventory_number }}</div>
+        </div>
+        <div class="detail-item">
+            <label>Тип оборудования</label>
+            <div class="value">{{ eq.equipment_type }}</div>
+        </div>
+        <div class="detail-item">
+            <label>Статус</label>
+            <div class="value"><span class="badge badge-{{ eq.status }}">{{ eq.get_status_display }}</span></div>
+        </div>
+        <div class="detail-item">
+            <label>Местоположение</label>
+            <div class="value">{{ eq.location|default:"—" }}</div>
+        </div>
+        <div class="detail-item">
+            <label>Эксплуатация</label>
+            <div class="value">{{ eq.operator|default:"Не эксплуатируется" }}</div>
+        </div>
+        <div class="detail-item">
+            <label>Дата создания</label>
+            <div class="value">{{ eq.created_at|date:"d.m.Y H:i" }}</div>
+        </div>
+    </div>
+    {% if eq.description %}
+    <div style="margin-top: 20px;">
+        <label style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Описание</label>
+        <p style="margin-top: 4px; white-space: pre-wrap;">{{ eq.description }}</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

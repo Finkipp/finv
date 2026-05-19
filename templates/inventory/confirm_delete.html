@@ -1,0 +1,18 @@
+{% extends "inventory/base.html" %}
+{% block content %}
+<div class="page-header">
+    <h1>🗑️ Подтверждение удаления</h1>
+    <a href="javascript:history.back()" class="btn btn-outline">← Назад</a>
+</div>
+
+<div class="card" style="max-width: 500px;">
+    <p style="margin-bottom: 16px;">Вы уверены, что хотите удалить «<strong>{{ object }}</strong>»?</p>
+    <form method="post">
+        {% csrf_token %}
+        <div class="btn-group">
+            <button type="submit" class="btn btn-danger">🗑️ Удалить</button>
+            <a href="javascript:history.back()" class="btn btn-outline">Отмена</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

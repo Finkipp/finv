@@ -1,0 +1,67 @@
+{% extends "inventory/base.html" %}
+{% block content %}
+<div class="page-header">
+    <h1>🗑️ Списание</h1>
+    {% if user.is_staff or perms.inventory.change_equipment %}
+    <a href="{% url 'writeoff_add' %}" class="btn btn-primary">+ Добавить</a>
+    {% endif %}
+</div>
+
+<div class="card">
+    <form method="get" style="margin-bottom: 16px;">
+        <div class="search-bar">
+            <input type="text" name="q" class="form-control" placeholder="Поиск..." value="{{ q }}" data-search>
+        </div>
+    </form>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Наименование</th>
+                    <th>Тип объекта</th>
+                    <th>Дата списания</th>
+                    <th>Дата оконч. списания</th>
+                    <th>Статус</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for w in writeoff_list %}
+                <tr>
+                    <td>{{ w.name }}</td>
+                    <td>{{ w.get_object_type_display }}</td>
+                    <td>{{ w.actual_date|date:"d.m.Y" }}</td>
+                    <td>{{ w.final_date|date:"d.m.Y"|default:"—" }}</td>
+                    <td><span class="badge badge-{{ w.status }}">{{ w.get_status_display }}</span></td>
+                    <td>
+                        <div class="btn-group">
+                            {% if user.is_staff or perms.inventory.change_equipment %}
+                            <a href="{% url 'writeoff_edit' w.pk %}" class="btn btn-sm btn-outline">✏️</a>
+                            {% endif %}
+                            {% if user.is_staff %}
+                            <a href="{% url 'writeoff_delete' w.pk %}" class="btn btn-sm btn-danger">🗑️</a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Нет записей</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page=1{% if q %}&q={{ q }}{% endif %}">&laquo;</a>
+        <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}">&lsaquo;</a>
+        {% endif %}
+        <span class="current">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}">&rsaquo;</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}{% if q %}&q={{ q }}{% endif %}">&raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

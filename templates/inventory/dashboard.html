@@ -1,0 +1,103 @@
+{% extends "inventory/base.html" %}
+{% block content %}
+<div class="page-header">
+    <h1>📊 Дашборд</h1>
+</div>
+
+<div class="card-grid">
+    <div class="stat-card">
+        <span class="stat-value">{{ total_equipment }}</span>
+        <span class="stat-label">Единиц оборудования</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-value">{{ working_equipment }}</span>
+        <span class="stat-label">В рабочем состоянии</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-value">{{ broken_equipment }}</span>
+        <span class="stat-label">Нерабочие</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-value">{{ total_consumables }}</span>
+        <span class="stat-label">Расходников (ед.)</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-value">{{ total_consumable_items }}</span>
+        <span class="stat-label">Позиций расходников</span>
+    </div>
+</div>
+
+<div class="recent-grid">
+    <div class="card">
+        <h3 style="margin-bottom: 12px;">Последнее оборудование</h3>
+        <ul class="recent-list">
+            {% for eq in recent_equipment %}
+            <li>
+                <div>
+                    <div class="item-name">{{ eq.name }}</div>
+                    <div class="item-meta">{{ eq.inventory_number }} · {{ eq.get_status_display }}</div>
+                </div>
+                <a href="{% url 'equipment_detail' eq.pk %}" class="btn btn-sm btn-outline">→</a>
+            </li>
+            {% empty %}
+            <li class="item-name" style="color: var(--text-muted);">Нет записей</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="card">
+        <h3 style="margin-bottom: 12px;">Последние поступления</h3>
+        <ul class="recent-list">
+            {% for r in recent_receipts %}
+            <li>
+                <div>
+                    <div class="item-name">{{ r.name }}</div>
+                    <div class="item-meta">{{ r.date }} · {{ r.quantity }} шт.</div>
+                </div>
+            </li>
+            {% empty %}
+            <li class="item-name" style="color: var(--text-muted);">Нет записей</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<div class="card">
+    <h3 style="margin-bottom: 12px;">Статусы оборудования</h3>
+    <div class="chart-container" id="status-chart">
+        {% with total=total_equipment %}
+        {% if total > 0 %}
+        <div class="bar" style="height: {% widthratio working_equipment total 100 %}%; background: var(--success);">
+            <span class="bar-value">{{ working_equipment }}</span>
+            <span class="bar-label">Рабочий</span>
+        </div>
+        <div class="bar" style="height: {% widthratio broken_equipment total 100 %}%; background: var(--danger);">
+            <span class="bar-value">{{ broken_equipment }}</span>
+            <span class="bar-label">Нерабочий</span>
+        </div>
+        <div class="bar" style="height: {% widthratio unknown_equipment total 100 %}%; background: var(--text-muted);">
+            <span class="bar-value">{{ unknown_equipment }}</span>
+            <span class="bar-label">Неизвестно</span>
+        </div>
+        <div class="bar" style="height: {% widthratio repair_equipment total 100 %}%; background: var(--warning);">
+            <span class="bar-value">{{ repair_equipment }}</span>
+            <span class="bar-label">Ремонт</span>
+        </div>
+        {% endif %}
+        {% endwith %}
+    </div>
+</div>
+
+{% if low_stock %}
+<div class="card" style="border-color: var(--warning);">
+    <h3 style="margin-bottom: 12px; color: var(--warning);">⚠️ Расходники с низким запасом (&lt;5)</h3>
+    <ul class="recent-list">
+        {% for c in low_stock %}
+        <li>
+            <span class="item-name">{{ c.name }}</span>
+            <span class="item-meta">Осталось: {{ c.quantity }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+{% endblock %}

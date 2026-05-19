@@ -1,0 +1,40 @@
+{% extends "inventory/base.html" %}
+{% block content %}
+<div class="page-header">
+    <h1>{% if form.instance.pk %}✏️ Редактировать{% else %}➕ Добавить{% endif %} поступление</h1>
+    <a href="{% url 'receipt_list' %}" class="btn btn-outline">← Назад</a>
+</div>
+
+<div class="card">
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-row">
+            <div class="form-group">
+                <label>{{ form.equipment_type.label }}</label>
+                {{ form.equipment_type }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.name.label }}</label>
+                {{ form.name }}
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>{{ form.status.label }}</label>
+                {{ form.status }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.quantity.label }}</label>
+                {{ form.quantity }}
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>{{ form.supplier.label }}</label>
+                {{ form.supplier }}
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">💾 Сохранить</button>
+    </form>
+</div>
+{% endblock %}

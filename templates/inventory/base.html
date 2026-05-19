@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>finv — Учёт техники и оборудования</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏭</text></svg>">
+</head>
+<body>
+<div class="wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>finv</h2>
+            <button class="toggle-btn" id="sidebar-toggle" title="Скрыть/показать">☰</button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'dashboard' %}"><span class="icon">📊</span><span class="label">Дашборд</span></a>
+            <a href="{% url 'equipment_list' %}"><span class="icon">💻</span><span class="label">Оборудование</span></a>
+            <a href="{% url 'consumable_list' %}"><span class="icon">📦</span><span class="label">Расходники</span></a>
+            <a href="{% url 'receipt_list' %}"><span class="icon">📥</span><span class="label">Поступления</span></a>
+            <a href="{% url 'disposal_list' %}"><span class="icon">📤</span><span class="label">Уход</span></a>
+            <a href="{% url 'writeoff_list' %}"><span class="icon">🗑️</span><span class="label">Списание</span></a>
+            <hr style="border-color: var(--border); margin: 8px 0;">
+            <a href="{% url 'eqtype_list' %}"><span class="icon">📋</span><span class="label">Типы оборудования</span></a>
+            <a href="{% url 'location_list' %}"><span class="icon">📍</span><span class="label">Местоположения</span></a>
+            <a href="{% url 'supplier_list' %}"><span class="icon">🏢</span><span class="label">Поставщики</span></a>
+            <a href="{% url 'direction_list' %}"><span class="icon">🧭</span><span class="label">Направления ухода</span></a>
+            <a href="{% url 'operator_list' %}"><span class="icon">👤</span><span class="label">Эксплуатанты</span></a>
+            {% if user.is_staff %}
+            <hr style="border-color: var(--border); margin: 8px 0;">
+            <a href="{% url 'admin:index' %}"><span class="icon">⚙️</span><span class="label">Админ-панель</span></a>
+            {% endif %}
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar">{{ user.username|first|upper }}</div>
+                <span>{{ user.username }}</span>
+            </div>
+            <div style="margin-top: 8px; display: flex; gap: 4px;">
+                <button class="theme-toggle" id="theme-toggle" title="Сменить тему">🌓</button>
+                <a href="{% url 'logout' %}" class="btn btn-outline btn-sm" style="flex:1; justify-content:center;">Выйти</a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+</div>
+<script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>
