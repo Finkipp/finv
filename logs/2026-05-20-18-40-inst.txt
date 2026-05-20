@@ -1,0 +1,190 @@
+[INFO]  Mode: install
+[INFO]  Installing system dependencies...
+Последняя проверка окончания срока действия метаданных: 0:41:47 назад, Ср 20 мая 2026 17:57:17.
+Пакет python3-3.11.15-3.red80.x86_64 уже установлен.
+Пакет python3-pip-25.1.1-5.red80.noarch уже установлен.
+Пакет python3-devel-3.11.15-3.red80.x86_64 уже установлен.
+Пакет postgresql-server-16.13-1.red80.x86_64 уже установлен.
+Пакет libpq18-devel-18.1-1.red80.x86_64 уже установлен.
+Пакет policycoreutils-python-utils-3.5-1.red80.noarch уже установлен.
+Зависимости разрешены.
+Отсутствуют действия для выполнения.
+Выполнено!
+[INFO]  Configuring PostgreSQL...
+Пароль пользователя postgres: 
+Пароль пользователя postgres: Пароль пользователя postgres: Пароль пользователя postgres: Пароль пользователя postgres: [INFO]  Copying project to /opt/finv...
+[INFO]  Setting up Python virtual environment...
+Requirement already satisfied: pip in /opt/finv/venv/lib64/python3.11/site-packages (26.1.1)
+Requirement already satisfied: setuptools in /opt/finv/venv/lib64/python3.11/site-packages (82.0.1)
+Requirement already satisfied: wheel in /opt/finv/venv/lib64/python3.11/site-packages (0.47.0)
+Requirement already satisfied: packaging>=24.0 in /opt/finv/venv/lib64/python3.11/site-packages (from wheel) (26.2)
+Collecting Django<5.3,>=5.1 (from -r /opt/finv/requirements.txt (line 1))
+  Downloading django-5.2.14-py3-none-any.whl.metadata (4.1 kB)
+Collecting psycopg2-binary>=2.9 (from -r /opt/finv/requirements.txt (line 2))
+  Downloading psycopg2_binary-2.9.12-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (4.9 kB)
+Collecting gunicorn>=21.2 (from -r /opt/finv/requirements.txt (line 3))
+  Downloading gunicorn-26.0.0-py3-none-any.whl.metadata (5.4 kB)
+Collecting asgiref>=3.8.1 (from Django<5.3,>=5.1->-r /opt/finv/requirements.txt (line 1))
+  Downloading asgiref-3.11.1-py3-none-any.whl.metadata (9.3 kB)
+Collecting sqlparse>=0.3.1 (from Django<5.3,>=5.1->-r /opt/finv/requirements.txt (line 1))
+  Downloading sqlparse-0.5.5-py3-none-any.whl.metadata (4.7 kB)
+Requirement already satisfied: packaging in /opt/finv/venv/lib64/python3.11/site-packages (from gunicorn>=21.2->-r /opt/finv/requirements.txt (line 3)) (26.2)
+Downloading django-5.2.14-py3-none-any.whl (8.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 8.3/8.3 MB 6.5 MB/s  0:00:01
+Downloading psycopg2_binary-2.9.12-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (4.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.3/4.3 MB 7.1 MB/s  0:00:00
+Downloading gunicorn-26.0.0-py3-none-any.whl (212 kB)
+Downloading asgiref-3.11.1-py3-none-any.whl (24 kB)
+Downloading sqlparse-0.5.5-py3-none-any.whl (46 kB)
+Installing collected packages: sqlparse, psycopg2-binary, gunicorn, asgiref, Django
+Successfully installed Django-5.2.14 asgiref-3.11.1 gunicorn-26.0.0 psycopg2-binary-2.9.12 sqlparse-0.5.5
+Requirement already satisfied: psycopg2-binary in /opt/finv/venv/lib64/python3.11/site-packages (2.9.12)
+Requirement already satisfied: gunicorn in /opt/finv/venv/lib64/python3.11/site-packages (26.0.0)
+Requirement already satisfied: packaging in /opt/finv/venv/lib64/python3.11/site-packages (from gunicorn) (26.2)
+[INFO]  Creating environment file...
+[INFO]  Running Django migrations...
+Operations to perform:
+  Apply all migrations: admin, auth, contenttypes, inventory, sessions
+Running migrations:
+  No migrations to apply.
+[INFO]  Collecting static files...
+Deleting 'css/style.css'
+Deleting 'js/main.js'
+Deleting 'admin/css/dark_mode.css'
+Deleting 'admin/css/unusable_password_field.css'
+Deleting 'admin/css/base.css'
+Deleting 'admin/css/login.css'
+Deleting 'admin/css/dashboard.css'
+Deleting 'admin/css/changelists.css'
+Deleting 'admin/css/nav_sidebar.css'
+Deleting 'admin/css/forms.css'
+Deleting 'admin/css/widgets.css'
+Deleting 'admin/css/rtl.css'
+Deleting 'admin/css/responsive_rtl.css'
+Deleting 'admin/css/responsive.css'
+Deleting 'admin/css/autocomplete.css'
+Deleting 'admin/css/vendor/select2/select2.css'
+Deleting 'admin/css/vendor/select2/select2.min.css'
+Deleting 'admin/css/vendor/select2/LICENSE-SELECT2.md'
+Deleting 'admin/js/actions.js'
+Deleting 'admin/js/nav_sidebar.js'
+Deleting 'admin/js/calendar.js'
+Deleting 'admin/js/jquery.init.js'
+Deleting 'admin/js/autocomplete.js'
+Deleting 'admin/js/cancel.js'
+Deleting 'admin/js/inlines.js'
+Deleting 'admin/js/popup_response.js'
+Deleting 'admin/js/SelectFilter2.js'
+Deleting 'admin/js/filters.js'
+Deleting 'admin/js/theme.js'
+Deleting 'admin/js/prepopulate.js'
+Deleting 'admin/js/urlify.js'
+Deleting 'admin/js/change_form.js'
+Deleting 'admin/js/core.js'
+Deleting 'admin/js/SelectBox.js'
+Deleting 'admin/js/prepopulate_init.js'
+Deleting 'admin/js/admin/DateTimeShortcuts.js'
+Deleting 'admin/js/admin/RelatedObjectLookups.js'
+Deleting 'admin/js/vendor/select2/select2.full.min.js'
+Deleting 'admin/js/vendor/select2/LICENSE.md'
+Deleting 'admin/js/vendor/select2/select2.full.js'
+Deleting 'admin/js/vendor/select2/i18n/uk.js'
+Deleting 'admin/js/vendor/select2/i18n/he.js'
+Deleting 'admin/js/vendor/select2/i18n/az.js'
+Deleting 'admin/js/vendor/select2/i18n/tr.js'
+Deleting 'admin/js/vendor/select2/i18n/pl.js'
+Deleting 'admin/js/vendor/select2/i18n/sr.js'
+Deleting 'admin/js/vendor/select2/i18n/sv.js'
+Deleting 'admin/js/vendor/select2/i18n/it.js'
+Deleting 'admin/js/vendor/select2/i18n/is.js'
+Deleting 'admin/js/vendor/select2/i18n/hy.js'
+Deleting 'admin/js/vendor/select2/i18n/cs.js'
+Deleting 'admin/js/vendor/select2/i18n/fa.js'
+Deleting 'admin/js/vendor/select2/i18n/ja.js'
+Deleting 'admin/js/vendor/select2/i18n/vi.js'
+Deleting 'admin/js/vendor/select2/i18n/fi.js'
+Deleting 'admin/js/vendor/select2/i18n/th.js'
+Deleting 'admin/js/vendor/select2/i18n/lv.js'
+Deleting 'admin/js/vendor/select2/i18n/ms.js'
+Deleting 'admin/js/vendor/select2/i18n/pt-BR.js'
+Deleting 'admin/js/vendor/select2/i18n/et.js'
+Deleting 'admin/js/vendor/select2/i18n/sr-Cyrl.js'
+Deleting 'admin/js/vendor/select2/i18n/hr.js'
+Deleting 'admin/js/vendor/select2/i18n/sl.js'
+Deleting 'admin/js/vendor/select2/i18n/ne.js'
+Deleting 'admin/js/vendor/select2/i18n/de.js'
+Deleting 'admin/js/vendor/select2/i18n/lt.js'
+Deleting 'admin/js/vendor/select2/i18n/bs.js'
+Deleting 'admin/js/vendor/select2/i18n/bg.js'
+Deleting 'admin/js/vendor/select2/i18n/bn.js'
+Deleting 'admin/js/vendor/select2/i18n/ka.js'
+Deleting 'admin/js/vendor/select2/i18n/dsb.js'
+Deleting 'admin/js/vendor/select2/i18n/eu.js'
+Deleting 'admin/js/vendor/select2/i18n/af.js'
+Deleting 'admin/js/vendor/select2/i18n/ca.js'
+Deleting 'admin/js/vendor/select2/i18n/nl.js'
+Deleting 'admin/js/vendor/select2/i18n/tk.js'
+Deleting 'admin/js/vendor/select2/i18n/zh-TW.js'
+Deleting 'admin/js/vendor/select2/i18n/id.js'
+Deleting 'admin/js/vendor/select2/i18n/el.js'
+Deleting 'admin/js/vendor/select2/i18n/ro.js'
+Deleting 'admin/js/vendor/select2/i18n/es.js'
+Deleting 'admin/js/vendor/select2/i18n/ps.js'
+Deleting 'admin/js/vendor/select2/i18n/km.js'
+Deleting 'admin/js/vendor/select2/i18n/mk.js'
+Deleting 'admin/js/vendor/select2/i18n/sq.js'
+Deleting 'admin/js/vendor/select2/i18n/ko.js'
+Deleting 'admin/js/vendor/select2/i18n/pt.js'
+Deleting 'admin/js/vendor/select2/i18n/ru.js'
+Deleting 'admin/js/vendor/select2/i18n/hi.js'
+Deleting 'admin/js/vendor/select2/i18n/hsb.js'
+Deleting 'admin/js/vendor/select2/i18n/ar.js'
+Deleting 'admin/js/vendor/select2/i18n/en.js'
+Deleting 'admin/js/vendor/select2/i18n/gl.js'
+Deleting 'admin/js/vendor/select2/i18n/hu.js'
+Deleting 'admin/js/vendor/select2/i18n/nb.js'
+Deleting 'admin/js/vendor/select2/i18n/zh-CN.js'
+Deleting 'admin/js/vendor/select2/i18n/da.js'
+Deleting 'admin/js/vendor/select2/i18n/sk.js'
+Deleting 'admin/js/vendor/select2/i18n/fr.js'
+Deleting 'admin/js/vendor/xregexp/xregexp.min.js'
+Deleting 'admin/js/vendor/xregexp/LICENSE.txt'
+Deleting 'admin/js/vendor/xregexp/xregexp.js'
+Deleting 'admin/js/vendor/jquery/jquery.js'
+Deleting 'admin/js/vendor/jquery/jquery.min.js'
+Deleting 'admin/js/vendor/jquery/LICENSE.txt'
+Deleting 'admin/img/icon-hidelink.svg'
+Deleting 'admin/img/inline-delete.svg'
+Deleting 'admin/img/icon-addlink.svg'
+Deleting 'admin/img/icon-alert.svg'
+Deleting 'admin/img/icon-no-dark.svg'
+Deleting 'admin/img/icon-unknown.svg'
+Deleting 'admin/img/selector-icons.svg'
+Deleting 'admin/img/tooltag-add.svg'
+Deleting 'admin/img/icon-deletelink.svg'
+Deleting 'admin/img/icon-unknown-alt.svg'
+Deleting 'admin/img/calendar-icons.svg'
+Deleting 'admin/img/icon-changelink.svg'
+Deleting 'admin/img/icon-info-dark.svg'
+Deleting 'admin/img/icon-no.svg'
+Deleting 'admin/img/search.svg'
+Deleting 'admin/img/icon-calendar.svg'
+Deleting 'admin/img/icon-yes-dark.svg'
+Deleting 'admin/img/sorting-icons.svg'
+Deleting 'admin/img/icon-info.svg'
+Deleting 'admin/img/icon-clock.svg'
+Deleting 'admin/img/icon-yes.svg'
+Deleting 'admin/img/icon-debug-dark.svg'
+Deleting 'admin/img/icon-debug.svg'
+Deleting 'admin/img/icon-viewlink.svg'
+Deleting 'admin/img/tooltag-arrowright.svg'
+Deleting 'admin/img/README.md'
+Deleting 'admin/img/icon-alert-dark.svg'
+
+129 static files copied to '/opt/finv/staticfiles'.
+[INFO]  Configuring SELinux...
+[INFO]  Creating systemd service...
+Created symlink /etc/systemd/system/multi-user.target.wants/finv.service → /etc/systemd/system/finv.service.
+[INFO]  Starting finv...
+Job for finv.service failed because of unavailable resources or another system error.
+See "systemctl status finv.service" and "journalctl -xeu finv.service" for details.

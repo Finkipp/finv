@@ -82,16 +82,19 @@ if ! systemctl is-active --quiet postgresql; then
     sleep 2
 fi
 
-# allow password auth for local TCP (needed for Django)
+# configure pg_hba.conf:
+#   - local socket → peer (so sudo -u postgres works without password)
+#   - TCP on 127.0.0.1 → md5 (so Django/psycopg2 can connect)
 PG_HBA="$(find /var/lib/pgsql -name pg_hba.conf 2>/dev/null | head -1)"
 if [[ -n "$PG_HBA" ]]; then
-    # change local socket auth to md5 if not already
-    sed -i 's/^local\s\+all\s\+all\s\+peer/local   all             all                                     md5/' "$PG_HBA"
-    # ensure host entry exists
-    if ! grep -q "^host\s\+all\s\+all\s\+127.0.0.1/32\s\+md5" "$PG_HBA"; then
-        echo "host    all             all             127.0.0.1/32            md5" >> "$PG_HBA"
-    fi
+    # local socket → peer (sudo -u postgres works without password)
+    sed -i 's/^local\s\+all\s\+all\s\+md5/local   all             all                                     peer/' "$PG_HBA"
+    sed -i 's/^local\s\+all\s\+all\s\+scram-sha-256/local   all             all                                     peer/' "$PG_HBA"
+    # localhost TCP → md5 (psycopg2 connects via TCP, needs password)
+    sed -i 's/^host\s\+all\s\+all\s\+127\.0\.0\.1\/32\s\+ident/host    all             all             127.0.0.1\/32            md5/' "$PG_HBA"
+    sed -i 's/^host\s\+all\s\+all\s\+::1\/128\s\+ident/host    all             all             ::1\/128                 md5/' "$PG_HBA"
     systemctl restart postgresql
+    sleep 2
 fi
 
 # create role + database (idempotent)
@@ -164,20 +167,29 @@ chmod 600 "$ENV_FILE"
 
 # ─── 7. Django: migrate + static ──────────────
 log_info "Running Django migrations..."
-sudo -u "${APP_USER}" bash -c "cd ${APP_DIR} && source venv/bin/activate && python manage.py migrate --noinput"
+sudo -u "${APP_USER}" bash -c "set -a; source ${APP_DIR}/.env; set +a; cd ${APP_DIR} && source venv/bin/activate && python manage.py migrate --noinput"
 
 log_info "Collecting static files..."
-sudo -u "${APP_USER}" bash -c "cd ${APP_DIR} && source venv/bin/activate && python manage.py collectstatic --noinput --clear"
+sudo -u "${APP_USER}" bash -c "set -a; source ${APP_DIR}/.env; set +a; cd ${APP_DIR} && source venv/bin/activate && python manage.py collectstatic --noinput --clear"
 
-# ─── 8. SELinux ───────────────────────────────
+# ─── 8. Create default superuser ──────────────
+log_info "Creating default superuser (admin:admin123)..."
+sudo -u "${APP_USER}" bash -c "set -a; source ${APP_DIR}/.env; set +a; cd ${APP_DIR} && source venv/bin/activate && DJANGO_SUPERUSER_PASSWORD=admin123 python manage.py createsuperuser --username=admin --email=admin@example.com --noinput" 2>/dev/null || true
+
+# ─── 9. SELinux ────────────────────────────────
 if command -v getenforce &>/dev/null && [[ "$(getenforce)" != "Disabled" ]]; then
     log_info "Configuring SELinux..."
-    semanage fcontext -a -t httpd_sys_content_t "${APP_DIR}(/.*)?" 2>/dev/null || true
-    restorecon -R "${APP_DIR}" 2>/dev/null || true
+    # remove any previously registered broad rule that covered .env
+    semanage fcontext -d "${APP_DIR}(/.*)?" 2>/dev/null || true
+    # apply httpd context only to static files (for reverse proxy), not .env
+    semanage fcontext -a -t httpd_sys_content_t "${APP_DIR}/staticfiles(/.*)?" 2>/dev/null || true
+    restorecon -R "${APP_DIR}/staticfiles" 2>/dev/null || true
+    # reset .env to default context so systemd can read it
+    restorecon "${APP_DIR}/.env" 2>/dev/null || true
     setsebool -P httpd_can_network_connect on 2>/dev/null || true
 fi
 
-# ─── 9. systemd service ───────────────────────
+# ─── 10. systemd service ──────────────────────
 log_info "Creating systemd service..."
 cat > "$SERVICE_FILE" <<SERVICEEOF
 [Unit]
@@ -203,18 +215,18 @@ SERVICEEOF
 systemctl daemon-reload
 systemctl enable "${APP_NAME}"
 
-# ─── 10. Start ────────────────────────────────
+# ─── 11. Start ────────────────────────────────
 log_info "Starting ${APP_NAME}..."
 systemctl restart "${APP_NAME}"
 
-# ─── 11. Verify ───────────────────────────────
+# ─── 12. Verify ───────────────────────────────
 sleep 3
 if systemctl is-active --quiet "${APP_NAME}"; then
     log_info "${APP_NAME} is RUNNING and enabled on port 8000."
     echo -e "  ${GREEN}✓${NC} Service:  ${SERVICE_FILE}"
     echo -e "  ${GREEN}✓${NC} App dir:  ${APP_DIR}"
     echo -e "  ${GREEN}✓${NC} DB:       ${DB_NAME} @ localhost:5432"
-    echo -e "  ${YELLOW}➜${NC} Create superuser: sudo ${APP_DIR}/venv/bin/python ${APP_DIR}/manage.py createsuperuser"
+    echo -e "  ${GREEN}✓${NC} Superuser:   admin / admin123"
 else
     log_error "${APP_NAME} failed to start. Check logs:"
     echo "  journalctl -u ${APP_NAME} -n 50 --no-pager"

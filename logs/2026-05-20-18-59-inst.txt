@@ -1,0 +1,50 @@
+...успешный предыдущий код...
+
+129 static files copied to '/opt/finv/staticfiles'.
+[INFO]  Configuring SELinux...
+[INFO]  Creating systemd service...
+Created symlink /etc/systemd/system/multi-user.target.wants/finv.service → /etc/systemd/system/finv.service.
+[INFO]  Starting finv...
+Job for finv.service failed because of unavailable resources or another system error.
+See "systemctl status finv.service" and "journalctl -xeu finv.service" for details.
+
+[admin@localhost finv-main]$ systemctl status finv.service
+● finv.service - finv inventory system
+     Loaded: loaded (/etc/systemd/system/finv.service; enabled; preset: disabled)
+    Drop-In: /usr/lib/systemd/system/service.d
+             └─10-timeout-abort.conf
+     Active: activating (auto-restart) (Result: resources) since Wed 2026-05-20 18:59:54 +04; 2s ago
+        CPU: 0
+
+[admin@localhost finv-main]$ journalctl -xeu finv.service
+░░ 
+░░ Результат: failed.
+мая 20 19:00:41 localhost.localdomain systemd[1]: finv.service: Scheduled restart job, restart counter is at 32.
+░░ Subject: Назначен автоматический перезапуск юнита
+░░ Defined-By: systemd
+░░ Support: https://lists.freedesktop.org/mailman/listinfo/systemd-devel
+░░ 
+░░ Назначен автоматический перезапуск юнита finv.service, так как для него был задан 
+░░ параметр Restart=.
+мая 20 19:00:41 localhost.localdomain systemd[1]: Stopped finv.service - finv inventory system.
+░░ Subject: Завершена остановка юнита finv.service.
+░░ Defined-By: systemd
+░░ Support: https://lists.freedesktop.org/mailman/listinfo/systemd-devel
+░░ 
+░░ Процесс остановки юнита finv.service был завершен.
+мая 20 19:00:41 localhost.localdomain systemd[1]: finv.service: Failed to load environment files: Permission denied
+мая 20 19:00:41 localhost.localdomain systemd[1]: finv.service: Failed to run 'start' task: Permission denied
+мая 20 19:00:41 localhost.localdomain systemd[1]: finv.service: Failed with result 'resources'.
+░░ Subject: Unit failed
+░░ Defined-By: systemd
+░░ Support: https://lists.freedesktop.org/mailman/listinfo/systemd-devel
+░░ 
+░░ The unit finv.service has entered the 'failed' state with result 'resources'.
+мая 20 19:00:41 localhost.localdomain systemd[1]: Failed to start finv.service - finv inventory system.
+░░ Subject: Ошибка юнита finv.service
+░░ Defined-By: systemd
+░░ Support: https://lists.freedesktop.org/mailman/listinfo/systemd-devel
+░░ 
+░░ Произошел сбой юнита finv.service.
+░░ 
+░░ Результат: failed.

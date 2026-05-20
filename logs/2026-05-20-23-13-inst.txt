@@ -1,0 +1,10 @@
+129 static files copied to '/opt/finv/staticfiles'.
+[INFO]  Configuring SELinux...
+[INFO]  Creating systemd service...
+Created symlink /etc/systemd/system/multi-user.target.wants/finv.service → /etc/systemd/system/finv.service.
+[INFO]  Starting finv...
+[INFO]  finv is RUNNING and enabled on port 8000.
+  ✓ Service:  /etc/systemd/system/finv.service
+  ✓ App dir:  /opt/finv
+  ✓ DB:       finv @ localhost:5432
+  ➜ Create superuser: sudo /opt/finv/venv/bin/python /opt/finv/manage.py createsuperuser
