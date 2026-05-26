@@ -1,0 +1,78 @@
+{% extends "inventory/base.html" %}
+{% block content %}
+<div class="page-header">
+    <h1>📋 Заказы</h1>
+    <div class="page-actions">
+        {% if user.is_staff or perms.inventory.change_equipment %}
+        <a href="{% url 'order_add' %}" class="btn btn-primary">+ Добавить</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <div class="toolbar">
+        <form method="get" class="search-bar">
+            <input type="text" name="q" class="form-control" placeholder="Поиск..." value="{{ q }}" data-search>
+            <button type="submit" class="btn btn-primary btn-search">🔍</button>
+        </form>
+        <div class="btn-group">
+            <button class="btn btn-outline btn-sm" onclick="window.print()">🖨️ Печать</button>
+            <a href="{% url 'export_csv' 'order' %}" class="btn btn-outline btn-sm">📥 Экспорт</a>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Филиал</th>
+                    <th>Наименование</th>
+                    <th>Тип</th>
+                    <th>Количество</th>
+                    <th>Статус</th>
+                    <th>Дата</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for o in order_list %}
+                <tr>
+                    <td>{{ o.branch }}</td>
+                    <td>{{ o.name }}</td>
+                    <td>{{ o.equipment_type }}</td>
+                    <td>{{ o.quantity }}</td>
+                    <td><span class="badge badge-{{ o.status }}">{{ o.get_status_display }}</span></td>
+                    <td>{{ o.created_at|date:"d.m.Y H:i" }}</td>
+                    <td>
+                        <div class="btn-group">
+                            {% if user.is_staff or perms.inventory.change_equipment %}
+                            <a href="{% url 'order_edit' o.pk %}" class="btn btn-sm btn-outline">✏️</a>
+                            {% endif %}
+                            {% if user.is_staff %}
+                            <a href="{% url 'order_delete' o.pk %}" class="btn btn-sm btn-danger">🗑️</a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" style="text-align:center; color:var(--text-muted);">Нет записей</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page=1{% if q %}&q={{ q }}{% endif %}">&laquo;</a>
+        <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}">&lsaquo;</a>
+        {% endif %}
+        <span class="current">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}">&rsaquo;</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}{% if q %}&q={{ q }}{% endif %}">&raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

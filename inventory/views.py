@@ -1,18 +1,20 @@
-from django.http import JsonResponse
+import csv
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView, View
 from django.db.models import Q, Sum, F, Value, CharField
 from django.db.models.functions import Coalesce
 from .models import (
-    Equipment, Consumable, Receipt, Disposal, WriteOff,
+    Equipment, Consumable, Receipt, Disposal, WriteOff, Order, Movement,
     EquipmentType, Location, Supplier, DisposalDirection, Operator,
 )
 from .forms import (
     EquipmentForm, ConsumableForm, ReceiptForm, DisposalForm, WriteOffForm,
+    OrderForm, MovementForm,
 )
 
 
@@ -115,6 +117,15 @@ class EquipmentListView(LoginRequiredMixin, ListView):
                 Q(location__name__icontains=q) |
                 Q(description__icontains=q)
             )
+        status = self.request.GET.get("status", "")
+        if status:
+            qs = qs.filter(status=status)
+        eq_type = self.request.GET.get("equipment_type", "")
+        if eq_type:
+            qs = qs.filter(equipment_type_id=eq_type)
+        loc = self.request.GET.get("location", "")
+        if loc:
+            qs = qs.filter(location_id=loc)
         return qs
 
     def get_context_data(self, **kwargs):
@@ -122,6 +133,12 @@ class EquipmentListView(LoginRequiredMixin, ListView):
         ctx.update(get_sidebar_context(self.request))
         ctx["q"] = self.request.GET.get("q", "")
         ctx["section"] = "equipment"
+        ctx["filter_status"] = self.request.GET.get("status", "")
+        ctx["filter_equipment_type"] = self.request.GET.get("equipment_type", "")
+        ctx["filter_location"] = self.request.GET.get("location", "")
+        ctx["equipment_types"] = EquipmentType.objects.all()
+        ctx["locations"] = Location.objects.all()
+        ctx["statuses"] = Equipment.STATUS_CHOICES
         return ctx
 
 
@@ -372,19 +389,41 @@ class DisposalCreateView(EditorRequiredMixin, CreateView):
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        self._update_consumable(form)
+        self._apply_changes(form)
         return response
 
-    def _update_consumable(self, form):
-        eq_type = form.cleaned_data["equipment_type"]
-        name = form.cleaned_data["name"]
+    def _apply_changes(self, form):
+        link_eq = form.cleaned_data.get("link_equipment")
+        link_cons = form.cleaned_data.get("link_consumable")
         qty = form.cleaned_data["quantity"]
-        try:
-            cons = Consumable.objects.get(equipment_type=eq_type, name=name)
-            cons.quantity -= qty
-            cons.save(update_fields=["quantity"])
-        except Consumable.DoesNotExist:
-            pass
+
+        if link_eq:
+            # Update equipment: change status to "broken" or set location to direction
+            link_eq.status = "broken"
+            if form.cleaned_data.get("direction"):
+                # Try to find location matching direction name
+                loc, _ = Location.objects.get_or_create(name=str(form.cleaned_data["direction"]))
+                link_eq.location = loc
+            link_eq.save(update_fields=["status", "location"])
+        elif link_cons:
+            # Deduct from consumable quantity
+            link_cons.quantity -= qty
+            if link_cons.quantity < 0:
+                link_cons.quantity = 0
+            link_cons.save(update_fields=["quantity"])
+        else:
+            # Fallback: original behavior — deduct from matching consumable
+            try:
+                cons = Consumable.objects.get(
+                    equipment_type=form.cleaned_data["equipment_type"],
+                    name=form.cleaned_data["name"]
+                )
+                cons.quantity -= qty
+                if cons.quantity < 0:
+                    cons.quantity = 0
+                cons.save(update_fields=["quantity"])
+            except Consumable.DoesNotExist:
+                pass
 
 
 class DisposalUpdateView(EditorRequiredMixin, UpdateView):
@@ -629,3 +668,186 @@ class OperatorDeleteView(StaffRequiredMixin, RefMixin, DeleteView):
     model = Operator
     template_name = "inventory/confirm_delete.html"
     success_url = reverse_lazy("operator_list")
+
+
+# ─── Orders ────────────────────────────────────────────────────────────────
+
+class OrderListView(LoginRequiredMixin, ListView):
+    model = Order
+    template_name = "inventory/order_list.html"
+    context_object_name = "order_list"
+    paginate_by = 25
+
+    def get_queryset(self):
+        qs = Order.objects.select_related("equipment_type")
+        q = self.request.GET.get("q", "")
+        if q:
+            qs = qs.filter(
+                Q(name__icontains=q) |
+                Q(branch__icontains=q) |
+                Q(equipment_type__name__icontains=q)
+            )
+        return qs
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx.update(get_sidebar_context(self.request))
+        ctx["q"] = self.request.GET.get("q", "")
+        ctx["section"] = "orders"
+        return ctx
+
+
+class OrderCreateView(EditorRequiredMixin, CreateView):
+    model = Order
+    form_class = OrderForm
+    template_name = "inventory/order_form.html"
+    success_url = reverse_lazy("order_list")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx.update(get_sidebar_context(self.request))
+        ctx["section"] = "orders"
+        return ctx
+
+
+class OrderUpdateView(EditorRequiredMixin, UpdateView):
+    model = Order
+    form_class = OrderForm
+    template_name = "inventory/order_form.html"
+    success_url = reverse_lazy("order_list")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx.update(get_sidebar_context(self.request))
+        ctx["section"] = "orders"
+        return ctx
+
+
+class OrderDeleteView(StaffRequiredMixin, DeleteView):
+    model = Order
+    template_name = "inventory/confirm_delete.html"
+    success_url = reverse_lazy("order_list")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx.update(get_sidebar_context(self.request))
+        ctx["section"] = "orders"
+        return ctx
+
+
+# ─── Movements ─────────────────────────────────────────────────────────────
+
+class MovementListView(LoginRequiredMixin, ListView):
+    model = Movement
+    template_name = "inventory/movement_list.html"
+    context_object_name = "movement_list"
+    paginate_by = 25
+
+    def get_queryset(self):
+        qs = Movement.objects.select_related("equipment", "consumable", "from_location", "to_location", "from_operator", "to_operator", "created_by")
+        q = self.request.GET.get("q", "")
+        if q:
+            qs = qs.filter(
+                Q(note__icontains=q) |
+                Q(equipment__name__icontains=q) |
+                Q(consumable__name__icontains=q)
+            )
+        return qs
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx.update(get_sidebar_context(self.request))
+        ctx["q"] = self.request.GET.get("q", "")
+        ctx["section"] = "movements"
+        return ctx
+
+
+class MovementCreateView(EditorRequiredMixin, CreateView):
+    model = Movement
+    form_class = MovementForm
+    template_name = "inventory/movement_form.html"
+    success_url = reverse_lazy("movement_list")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx.update(get_sidebar_context(self.request))
+        ctx["section"] = "movements"
+        return ctx
+
+    def form_valid(self, form):
+        form.instance.created_by = self.request.user
+        response = super().form_valid(form)
+        # Update equipment location/operator
+        eq = form.cleaned_data.get("equipment")
+        if eq:
+            if form.cleaned_data.get("to_location"):
+                eq.location = form.cleaned_data["to_location"]
+            if form.cleaned_data.get("to_operator"):
+                eq.operator = form.cleaned_data["to_operator"]
+            eq.save(update_fields=["location", "operator"])
+        # Update consumable location
+        cons = form.cleaned_data.get("consumable")
+        if cons and form.cleaned_data.get("to_location"):
+            cons.location = form.cleaned_data["to_location"]
+            cons.save(update_fields=["location"])
+        return response
+
+
+class MovementUpdateView(EditorRequiredMixin, UpdateView):
+    model = Movement
+    form_class = MovementForm
+    template_name = "inventory/movement_form.html"
+    success_url = reverse_lazy("movement_list")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx.update(get_sidebar_context(self.request))
+        ctx["section"] = "movements"
+        return ctx
+
+
+class MovementDeleteView(StaffRequiredMixin, DeleteView):
+    model = Movement
+    template_name = "inventory/confirm_delete.html"
+    success_url = reverse_lazy("movement_list")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx.update(get_sidebar_context(self.request))
+        ctx["section"] = "movements"
+        return ctx
+
+
+# ─── Export ─────────────────────────────────────────────────────────────────
+
+class ExportCSVView(LoginRequiredMixin, View):
+    def get(self, request, model_name):
+        model_map = {
+            "equipment": (Equipment, ["inventory_number", "name", "equipment_type__name", "status", "location__name", "operator__full_name", "description"]),
+            "consumable": (Consumable, ["name", "equipment_type__name", "quantity", "location__name"]),
+            "receipt": (Receipt, ["date", "name", "equipment_type__name", "status", "quantity", "supplier__name"]),
+            "disposal": (Disposal, ["date", "name", "equipment_type__name", "quantity", "direction__name"]),
+            "writeoff": (WriteOff, ["name", "object_type", "reason", "status", "actual_date", "final_date"]),
+            "order": (Order, ["branch", "name", "equipment_type__name", "quantity", "status", "created_at"]),
+            "movement": (Movement, ["equipment__name", "consumable__name", "from_location__name", "to_location__name", "from_operator__full_name", "to_operator__full_name", "created_at"]),
+        }
+        if model_name not in model_map:
+            return JsonResponse({"error": "unknown model"}, status=404)
+        model_class, fields = model_map[model_name]
+        qs = model_class.objects.all()
+        response = HttpResponse(content_type="text/csv; charset=utf-8")
+        response["Content-Disposition"] = f'attachment; filename="{model_name}.csv"'
+        response.write("\ufeff".encode("utf-8"))
+        writer = csv.writer(response)
+        headers = [f.split("__")[-1] for f in fields]
+        writer.writerow(headers)
+        for obj in qs:
+            row = []
+            for f in fields:
+                parts = f.split("__")
+                val = obj
+                for p in parts:
+                    val = getattr(val, p, "") if val else ""
+                row.append(str(val) if val is not None else "")
+            writer.writerow(row)
+        return response

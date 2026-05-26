@@ -5,34 +5,59 @@
     <a href="{% url 'writeoff_list' %}" class="btn btn-outline">← Назад</a>
 </div>
 
-<div class="card">
+<div class="form-card">
     <form method="post">
         {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+        <div class="alert alert-error">
+            {% for err in form.non_field_errors %}{{ err }}{% endfor %}
+        </div>
+        {% endif %}
+        
         <div class="form-row">
             <div class="form-group">
                 <label>{{ form.object_type.label }}</label>
                 {{ form.object_type }}
+                {% if form.object_type.errors %}
+                <div class="form-error">{{ form.object_type.errors.0 }}</div>
+                {% endif %}
             </div>
             <div class="form-group">
                 <label>{{ form.name.label }}</label>
                 {{ form.name }}
+                {% if form.name.errors %}
+                <div class="form-error">{{ form.name.errors.0 }}</div>
+                {% endif %}
             </div>
         </div>
         <div class="form-row">
             <div class="form-group">
                 <label>{{ form.status.label }}</label>
                 {{ form.status }}
+                {% if form.status.errors %}
+                <div class="form-error">{{ form.status.errors.0 }}</div>
+                {% endif %}
             </div>
             <div class="form-group">
                 <label>{{ form.final_date.label }}</label>
                 {{ form.final_date }}
+                {% if form.final_date.errors %}
+                <div class="form-error">{{ form.final_date.errors.0 }}</div>
+                {% endif %}
             </div>
         </div>
         <div class="form-group">
             <label>{{ form.reason.label }}</label>
             {{ form.reason }}
+            {% if form.reason.errors %}
+            <div class="form-error">{{ form.reason.errors.0 }}</div>
+            {% endif %}
         </div>
-        <button type="submit" class="btn btn-primary">💾 Сохранить</button>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">💾 Сохранить</button>
+            <a href="{% url 'writeoff_list' %}" class="btn btn-outline">Отмена</a>
+        </div>
     </form>
 </div>
 {% endblock %}

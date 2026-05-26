@@ -5,16 +5,29 @@
     <a href="{% url ref_url|add:'_list' %}" class="btn btn-outline">← Назад</a>
 </div>
 
-<div class="card">
+<div class="form-card">
     <form method="post">
         {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+        <div class="alert alert-error">
+            {% for err in form.non_field_errors %}{{ err }}{% endfor %}
+        </div>
+        {% endif %}
+        
         {% for field in form %}
         <div class="form-group">
             <label>{{ field.label }}</label>
             {{ field }}
+            {% if field.errors %}
+            <div class="form-error">{{ field.errors.0 }}</div>
+            {% endif %}
         </div>
         {% endfor %}
-        <button type="submit" class="btn btn-primary">💾 Сохранить</button>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">💾 Сохранить</button>
+            <a href="{% url ref_url|add:'_list' %}" class="btn btn-outline">Отмена</a>
+        </div>
     </form>
 </div>
 {% endblock %}

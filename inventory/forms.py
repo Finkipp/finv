@@ -1,6 +1,6 @@
 from django import forms
 from .models import (
-    Equipment, Consumable, Receipt, Disposal, WriteOff,
+    Equipment, Consumable, Receipt, Disposal, WriteOff, Order, Movement,
     EquipmentType, Location, Supplier, DisposalDirection, Operator,
 )
 
@@ -41,9 +41,45 @@ class ReceiptForm(forms.ModelForm):
 
 
 class DisposalForm(forms.ModelForm):
+    link_equipment = forms.ModelChoiceField(
+        queryset=Equipment.objects.all(),
+        required=False,
+        label="Оборудование (выберите существующее)",
+    )
+    link_consumable = forms.ModelChoiceField(
+        queryset=Consumable.objects.all(),
+        required=False,
+        label="Расходник (выберите существующий)",
+    )
+
     class Meta:
         model = Disposal
-        fields = ["equipment_type", "name", "quantity", "direction"]
+        fields = ["equipment_type", "name", "quantity", "direction", "link_equipment", "link_consumable"]
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get("link_equipment") and cleaned.get("link_consumable"):
+            raise forms.ValidationError("Выберите только одно: оборудование ИЛИ расходник")
+        return cleaned
+
+
+class OrderForm(forms.ModelForm):
+    class Meta:
+        model = Order
+        fields = ["branch", "equipment_type", "name", "quantity", "status", "note"]
+        widgets = {
+            "status": forms.Select(choices=Order.STATUS_CHOICES),
+            "note": forms.Textarea(attrs={"rows": 3}),
+        }
+
+
+class MovementForm(forms.ModelForm):
+    class Meta:
+        model = Movement
+        fields = ["equipment", "consumable", "from_location", "to_location", "from_operator", "to_operator", "note"]
+        widgets = {
+            "note": forms.Textarea(attrs={"rows": 3}),
+        }
 
 
 class WriteOffForm(forms.ModelForm):

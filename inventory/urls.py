@@ -32,6 +32,16 @@ urlpatterns = [
     path("writeoffs/add/", views.WriteOffCreateView.as_view(), name="writeoff_add"),
     path("writeoffs/<int:pk>/edit/", views.WriteOffUpdateView.as_view(), name="writeoff_edit"),
     path("writeoffs/<int:pk>/delete/", views.WriteOffDeleteView.as_view(), name="writeoff_delete"),
+    # Orders
+    path("orders/", views.OrderListView.as_view(), name="order_list"),
+    path("orders/add/", views.OrderCreateView.as_view(), name="order_add"),
+    path("orders/<int:pk>/edit/", views.OrderUpdateView.as_view(), name="order_edit"),
+    path("orders/<int:pk>/delete/", views.OrderDeleteView.as_view(), name="order_delete"),
+    # Movements
+    path("movements/", views.MovementListView.as_view(), name="movement_list"),
+    path("movements/add/", views.MovementCreateView.as_view(), name="movement_add"),
+    path("movements/<int:pk>/edit/", views.MovementUpdateView.as_view(), name="movement_edit"),
+    path("movements/<int:pk>/delete/", views.MovementDeleteView.as_view(), name="movement_delete"),
     # References
     path("refs/equipment-types/", views.EquipmentTypeListView.as_view(), name="eqtype_list"),
     path("refs/equipment-types/add/", views.EquipmentTypeCreateView.as_view(), name="eqtype_add"),
@@ -53,4 +63,6 @@ urlpatterns = [
     path("refs/operators/add/", views.OperatorCreateView.as_view(), name="operator_add"),
     path("refs/operators/<int:pk>/edit/", views.OperatorUpdateView.as_view(), name="operator_edit"),
     path("refs/operators/<int:pk>/delete/", views.OperatorDeleteView.as_view(), name="operator_delete"),
+    # Export
+    path("export/<str:model_name>/", views.ExportCSVView.as_view(), name="export_csv"),
 ]

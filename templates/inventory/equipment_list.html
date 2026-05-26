@@ -2,7 +2,7 @@
 {% block content %}
 <div class="page-header">
     <h1>💻 Оборудование</h1>
-    <div class="btn-group">
+    <div class="page-actions">
         {% if user.is_staff or perms.inventory.change_equipment %}
         <a href="{% url 'equipment_add' %}" class="btn btn-primary">+ Добавить</a>
         {% endif %}
@@ -10,11 +10,53 @@
 </div>
 
 <div class="card">
-    <form method="get" style="margin-bottom: 16px;">
-        <div class="search-bar">
+    <div class="toolbar">
+        <form method="get" class="search-bar">
             <input type="text" name="q" class="form-control" placeholder="Поиск по номеру, наименованию, помещению..." value="{{ q }}" data-search>
+            <button type="submit" class="btn btn-primary btn-search">🔍</button>
+        </form>
+        <div class="btn-group">
+            <button class="btn btn-outline btn-sm" onclick="window.print()">🖨️ Печать</button>
+            <a href="{% url 'export_csv' 'equipment' %}" class="btn btn-outline btn-sm">📥 Экспорт</a>
         </div>
-    </form>
+    </div>
+
+    <details class="filter-bar" {% if filter_status or filter_equipment_type or filter_location %}open{% endif %}>
+        <summary style="cursor:pointer; font-size:13px; color:var(--text-muted); margin-bottom:8px;">🔽 Фильтры</summary>
+        <form method="get" style="display:flex; gap:12px; flex-wrap:wrap; align-items:end;">
+            <div class="filter-group">
+                <label>Статус</label>
+                <select name="status" class="form-control" onchange="this.form.submit()">
+                    <option value="">Все</option>
+                    {% for val, label in statuses %}
+                    <option value="{{ val }}" {% if filter_status == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Тип</label>
+                <select name="equipment_type" class="form-control" onchange="this.form.submit()">
+                    <option value="">Все</option>
+                    {% for t in equipment_types %}
+                    <option value="{{ t.pk }}" {% if filter_equipment_type == t.pk|slugify %}selected{% endif %}>{{ t.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Местоположение</label>
+                <select name="location" class="form-control" onchange="this.form.submit()">
+                    <option value="">Все</option>
+                    {% for l in locations %}
+                    <option value="{{ l.pk }}" {% if filter_location == l.pk|slugify %}selected{% endif %}>{{ l.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% if filter_status or filter_equipment_type or filter_location %}
+            <a href="{% url 'equipment_list' %}" class="btn btn-outline btn-sm">Сбросить</a>
+            {% endif %}
+        </form>
+    </details>
+
     <div class="table-wrapper">
         <table>
             <thead>
@@ -54,6 +96,7 @@
             </tbody>
         </table>
     </div>
+
     {% if page_obj.paginator.num_pages > 1 %}
     <div class="pagination">
         {% if page_obj.has_previous %}

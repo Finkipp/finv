@@ -1,0 +1,79 @@
+{% extends "inventory/base.html" %}
+{% block content %}
+<div class="page-header">
+    <h1>{% if form.instance.pk %}✏️ Редактировать{% else %}➕ Добавить{% endif %} перемещение</h1>
+    <a href="{% url 'movement_list' %}" class="btn btn-outline">← Назад</a>
+</div>
+
+<div class="form-card">
+    <form method="post">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+        <div class="alert alert-error">
+            {% for err in form.non_field_errors %}{{ err }}{% endfor %}
+        </div>
+        {% endif %}
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label>{{ form.equipment.label }}</label>
+                {{ form.equipment }}
+                {% if form.equipment.errors %}
+                <div class="form-error">{{ form.equipment.errors.0 }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label>{{ form.consumable.label }}</label>
+                {{ form.consumable }}
+                {% if form.consumable.errors %}
+                <div class="form-error">{{ form.consumable.errors.0 }}</div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>{{ form.from_location.label }}</label>
+                {{ form.from_location }}
+                {% if form.from_location.errors %}
+                <div class="form-error">{{ form.from_location.errors.0 }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label>{{ form.to_location.label }}</label>
+                {{ form.to_location }}
+                {% if form.to_location.errors %}
+                <div class="form-error">{{ form.to_location.errors.0 }}</div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>{{ form.from_operator.label }}</label>
+                {{ form.from_operator }}
+                {% if form.from_operator.errors %}
+                <div class="form-error">{{ form.from_operator.errors.0 }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label>{{ form.to_operator.label }}</label>
+                {{ form.to_operator }}
+                {% if form.to_operator.errors %}
+                <div class="form-error">{{ form.to_operator.errors.0 }}</div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="form-group">
+            <label>{{ form.note.label }}</label>
+            {{ form.note }}
+            {% if form.note.errors %}
+            <div class="form-error">{{ form.note.errors.0 }}</div>
+            {% endif %}
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">💾 Сохранить</button>
+            <a href="{% url 'movement_list' %}" class="btn btn-outline">Отмена</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

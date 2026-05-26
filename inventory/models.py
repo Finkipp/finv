@@ -211,3 +211,54 @@ class WriteOff(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.get_object_type_display()})"
+
+
+class Order(models.Model):
+    STATUS_CHOICES = [
+        ("pending", "Ожидает"),
+        ("ordered", "Заказано"),
+        ("fulfilled", "Выполнен"),
+        ("cancelled", "Отменён"),
+    ]
+    branch = models.CharField("Филиал/Отдел", max_length=255)
+    equipment_type = models.ForeignKey(EquipmentType, on_delete=models.PROTECT, verbose_name="Тип")
+    name = models.CharField("Наименование", max_length=255)
+    quantity = models.PositiveIntegerField("Количество", default=1)
+    status = models.CharField("Статус", max_length=15, choices=STATUS_CHOICES, default="pending")
+    note = models.TextField("Примечание", blank=True)
+    created_at = models.DateTimeField("Дата создания", auto_now_add=True)
+    updated_at = models.DateTimeField("Дата обновления", auto_now=True)
+
+    class Meta:
+        verbose_name = "Заказ"
+        verbose_name_plural = "Заказы"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.name} — {self.get_status_display()}"
+
+
+class Movement(models.Model):
+    equipment = models.ForeignKey(Equipment, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Оборудование")
+    consumable = models.ForeignKey(Consumable, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Расходник")
+    from_location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True, related_name="movement_from", verbose_name="Откуда")
+    to_location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True, related_name="movement_to", verbose_name="Куда")
+    from_operator = models.ForeignKey(Operator, on_delete=models.SET_NULL, null=True, blank=True, related_name="movement_from_op", verbose_name="От эксплуатанта")
+    to_operator = models.ForeignKey(Operator, on_delete=models.SET_NULL, null=True, blank=True, related_name="movement_to_op", verbose_name="К эксплуатанту")
+    note = models.TextField("Описание перемещения", blank=True)
+    created_at = models.DateTimeField("Дата", auto_now_add=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Кто изменил")
+
+    class Meta:
+        verbose_name = "Перемещение"
+        verbose_name_plural = "Перемещения"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        parts = []
+        if self.equipment:
+            parts.append(str(self.equipment))
+        if self.consumable:
+            parts.append(str(self.consumable))
+        parts.append(self.note or "перемещение")
+        return " — ".join(parts)

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     EquipmentType, Location, Supplier, DisposalDirection, Operator,
-    Equipment, Consumable, Receipt, Disposal, WriteOff,
+    Equipment, Consumable, Receipt, Disposal, WriteOff, Order, Movement,
 )
 
 
@@ -68,3 +68,17 @@ class WriteOffAdmin(admin.ModelAdmin):
     list_display = ("name", "object_type", "status", "actual_date", "final_date")
     list_filter = ("status", "object_type")
     search_fields = ("name", "reason")
+
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ("name", "branch", "equipment_type", "quantity", "status", "created_at")
+    list_filter = ("status", "equipment_type")
+    search_fields = ("name", "branch", "note")
+
+
+@admin.register(Movement)
+class MovementAdmin(admin.ModelAdmin):
+    list_display = ("equipment", "consumable", "from_location", "to_location", "created_at")
+    list_filter = ("from_location", "to_location")
+    search_fields = ("note",)
