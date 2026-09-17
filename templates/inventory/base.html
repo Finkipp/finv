@@ -10,121 +10,47 @@
 </head>
 <body>
 <div class="wrapper">
+    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <h2>finv</h2>
-            <button type="button" class="toggle-btn" id="sidebar-toggle" title="Свернуть или развернуть панель" aria-label="Свернуть или развернуть панель" aria-expanded="true">☰</button>
+            <button class="toggle-btn" id="sidebar-toggle" title="Скрыть/показать">☰</button>
         </div>
         <nav class="sidebar-nav">
-            {% if perms.inventory.view_equipment and perms.inventory.view_consumable and perms.inventory.view_receipt and perms.inventory.view_writeoff %}<a href="{% url 'dashboard' %}" title="Дашборд"><span class="icon">📊</span><span class="label">Дашборд</span></a>{% endif %}
-            {% if perms.inventory.view_equipment %}
-            <a href="{% url 'equipment_list' %}" title="Оборудование"><span class="icon">💻</span><span class="label">Оборудование</span></a>
-            {% endif %}
-            {% if perms.inventory.view_consumable %}
-            <a href="{% url 'consumable_list' %}" title="Расходники"><span class="icon">📦</span><span class="label">Расходники</span></a>
-            {% endif %}
-            {% if perms.inventory.view_receipt %}
-            <a href="{% url 'receipt_list' %}" title="Поступления"><span class="icon">📥</span><span class="label">Поступления</span></a>
-            {% endif %}
-            {% if perms.inventory.view_disposal %}
-            <a href="{% url 'disposal_list' %}" title="Уход"><span class="icon">📤</span><span class="label">Уход</span></a>
-            {% endif %}
-            {% if perms.inventory.view_writeoff %}
-            <a href="{% url 'writeoff_list' %}" title="Списание"><span class="icon">🗑️</span><span class="label">Списание</span></a>
-            {% endif %}
-            {% if perms.inventory.view_order %}
-            <a href="{% url 'order_list' %}" title="Заказы"><span class="icon">📋</span><span class="label">Заказы</span></a>
-            {% endif %}
-            {% if perms.inventory.view_auditlog %}
-            <a href="{% url 'audit_log' %}" title="Журнал аудита"><span class="icon">🕘</span><span class="label">Журнал аудита</span></a>
-            {% endif %}
-
-            {% if perms.inventory.view_equipmenttype or perms.inventory.view_location or perms.inventory.view_supplier or perms.inventory.view_disposaldirection or perms.inventory.view_operator %}
-            <details class="sidebar-group" id="references-menu" {% if section == 'refs' %}open{% endif %}>
-                <summary title="Справочники"><span class="icon">🗂️</span><span class="label">Справочники</span><span class="nav-chevron">⌄</span></summary>
-                <div class="sidebar-subnav">
-                    {% if perms.inventory.view_equipmenttype %}
-                    <a href="{% url 'eqtype_list' %}" title="Типы оборудования"><span class="icon">•</span><span class="label">Типы оборудования</span></a>
-                    {% endif %}
-                    {% if perms.inventory.view_location %}
-                    <a href="{% url 'location_list' %}" title="Местоположения"><span class="icon">•</span><span class="label">Местоположения</span></a>
-                    {% endif %}
-                    {% if perms.inventory.view_supplier %}
-                    <a href="{% url 'supplier_list' %}" title="Поставщики"><span class="icon">•</span><span class="label">Поставщики</span></a>
-                    {% endif %}
-                    {% if perms.inventory.view_disposaldirection %}
-                    <a href="{% url 'direction_list' %}" title="Направления ухода"><span class="icon">•</span><span class="label">Направления ухода</span></a>
-                    {% endif %}
-                    {% if perms.inventory.view_operator %}
-                    <a href="{% url 'operator_list' %}" title="Эксплуатанты"><span class="icon">•</span><span class="label">Эксплуатанты</span></a>
-                    {% endif %}
-                </div>
-            </details>
-            {% endif %}
+            <a href="{% url 'dashboard' %}"><span class="icon">📊</span><span class="label">Дашборд</span></a>
+            <a href="{% url 'equipment_list' %}"><span class="icon">💻</span><span class="label">Оборудование</span></a>
+            <a href="{% url 'consumable_list' %}"><span class="icon">📦</span><span class="label">Расходники</span></a>
+            <a href="{% url 'receipt_list' %}"><span class="icon">📥</span><span class="label">Поступления</span></a>
+            <a href="{% url 'disposal_list' %}"><span class="icon">📤</span><span class="label">Уход</span></a>
+            <a href="{% url 'writeoff_list' %}"><span class="icon">🗑️</span><span class="label">Списание</span></a>
+            <hr style="border-color: var(--border); margin: 8px 0;">
+            <a href="{% url 'eqtype_list' %}"><span class="icon">📋</span><span class="label">Типы оборудования</span></a>
+            <a href="{% url 'location_list' %}"><span class="icon">📍</span><span class="label">Местоположения</span></a>
+            <a href="{% url 'supplier_list' %}"><span class="icon">🏢</span><span class="label">Поставщики</span></a>
+            <a href="{% url 'direction_list' %}"><span class="icon">🧭</span><span class="label">Направления ухода</span></a>
+            <a href="{% url 'operator_list' %}"><span class="icon">👤</span><span class="label">Эксплуатанты</span></a>
             {% if user.is_staff %}
-            <div class="sidebar-divider"></div>
-            <a href="{% url 'admin:index' %}" title="Админ-панель"><span class="icon">⚙️</span><span class="label">Админ-панель</span></a>
-            {% endif %}
-            {% if perms.inventory.manage_data_transfer %}
-            <a href="{% url 'export_data' %}" title="Экспорт данных"><span class="icon">📤</span><span class="label">Экспорт данных</span></a>
-            <a href="{% url 'import_data' %}" title="Импорт данных"><span class="icon">📥</span><span class="label">Импорт данных</span></a>
+            <hr style="border-color: var(--border); margin: 8px 0;">
+            <a href="{% url 'admin:index' %}"><span class="icon">⚙️</span><span class="label">Админ-панель</span></a>
             {% endif %}
         </nav>
         <div class="sidebar-footer">
-            <div class="profile-row">
-                <a href="{% url 'profile' %}" class="user-info" title="Открыть профиль">
-                    {% if current_profile.avatar %}
-                    <img src="{{ current_profile.avatar.url }}" alt="" class="user-avatar user-avatar-image">
-                    {% else %}
-                    <span class="user-avatar">{{ user.username|first|upper }}</span>
-                    {% endif %}
-                    <span class="user-meta"><strong>{{ user.get_full_name|default:user.username }}</strong><small>Профиль</small></span>
-                </a>
-                <div class="profile-actions">
-                    {% if perms.inventory.view_auditlog %}
-                    <a href="{% url 'notification_list' %}" class="footer-icon-btn notification-link" title="Уведомления" aria-label="Уведомления">
-                        <span aria-hidden="true">🔔</span>
-                        {% if unread_notifications_count %}<span class="notification-count">{{ unread_notifications_count }}</span>{% endif %}
-                    </a>
-                    {% endif %}
-                    <button type="button" class="footer-icon-btn info-button" id="about-open" title="О программе" aria-label="О программе">i</button>
-                </div>
+            <div class="user-info">
+                <div class="user-avatar">{{ user.username|first|upper }}</div>
+                <span>{{ user.username }}</span>
             </div>
-            <div class="footer-controls">
-                <button type="button" class="theme-toggle" id="theme-toggle" title="Сменить тему" aria-label="Сменить тему">🌓</button>
-                <form method="post" action="{% url 'logout' %}" class="logout-form">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-outline btn-sm">Выйти</button>
-                </form>
+            <div style="margin-top: 8px; display: flex; gap: 4px;">
+                <button class="theme-toggle" id="theme-toggle" title="Сменить тему">🌓</button>
+                <a href="{% url 'logout' %}" class="btn btn-outline btn-sm" style="flex:1; justify-content:center;">Выйти</a>
             </div>
         </div>
     </aside>
-    <button type="button" class="sidebar-backdrop" id="sidebar-backdrop" aria-label="Закрыть боковую панель"></button>
 
+    <!-- Main content -->
     <main class="main-content">
-        {% if messages %}
-        <div class="messages">
-            {% for message in messages %}<div class="alert alert-{{ message.tags|default:'success' }}">{{ message }}</div>{% endfor %}
-        </div>
-        {% endif %}
         {% block content %}{% endblock %}
     </main>
 </div>
-
-<dialog class="about-dialog" id="about-dialog" aria-labelledby="about-title">
-    <div class="about-dialog-header">
-        <div>
-            <span class="about-kicker">Система учёта техники</span>
-            <h2 id="about-title">finv {{ finv_version }}</h2>
-        </div>
-        <button type="button" class="dialog-close" id="about-close" aria-label="Закрыть">×</button>
-    </div>
-    <div class="about-dialog-body">
-        <p>Версия 4.1</p>
-        <h3>Авторы</h3>
-        <p>Finkipp, DeepSeek Flash, GPT-5.6 Sol</p>
-    </div>
-</dialog>
 <script src="{% static 'js/main.js' %}"></script>
 </body>
 </html>

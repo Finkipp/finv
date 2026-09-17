@@ -17,7 +17,6 @@
         {% endif %}
         <form method="post">
             {% csrf_token %}
-            {% if request.GET.next %}<input type="hidden" name="next" value="{{ request.GET.next }}">{% endif %}
             <div class="form-group">
                 <label for="username">Имя пользователя</label>
                 <input type="text" name="username" id="username" class="form-control" required autofocus>
