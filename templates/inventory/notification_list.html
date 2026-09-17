@@ -1,0 +1,53 @@
+{% extends "inventory/base.html" %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Уведомления</h1>
+        <p class="page-subtitle">События по выбранной в профиле подписке</p>
+    </div>
+    {% if unread_notifications_count %}
+    <form method="post" action="{% url 'notifications_read_all' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline">Прочитать все</button>
+    </form>
+    {% endif %}
+</div>
+
+<div class="card notification-card">
+    <div class="notification-list">
+        {% for notification in notifications %}
+        <article class="notification-item{% if not notification.is_read %} unread{% endif %}">
+            <div class="notification-marker" aria-hidden="true"></div>
+            <div class="notification-content">
+                <div class="notification-title">
+                    <strong>{{ notification.audit_log.get_action_display }}</strong>
+                    <span>{{ notification.audit_log.object_repr }}</span>
+                </div>
+                <div class="table-meta">
+                    {{ notification.audit_log.object_type_label }} · {{ notification.created_at|date:"d.m.Y H:i" }} · {{ notification.audit_log.actor_display_name|default:notification.audit_log.actor_username|default:"Система" }}
+                </div>
+                {% if notification.audit_log.note %}<p>{{ notification.audit_log.note }}</p>{% endif %}
+            </div>
+            {% if notification.is_read %}
+            <a href="{% url 'audit_detail' notification.audit_log_id %}" class="btn btn-sm btn-outline">Открыть</a>
+            {% else %}
+            <form method="post" action="{% url 'notification_read' notification.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-primary">Открыть</button>
+            </form>
+            {% endif %}
+        </article>
+        {% empty %}
+        <div class="empty-state"><h3>Уведомлений пока нет</h3><p>Выберите тип подписки в профиле, чтобы получать новые события.</p><a href="{% url 'profile' %}" class="btn btn-primary">Настроить подписку</a></div>
+        {% endfor %}
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}">Назад</a>{% endif %}
+        <span class="current">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}">Далее</a>{% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

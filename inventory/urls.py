@@ -5,6 +5,10 @@ urlpatterns = [
     path("", views.dashboard, name="dashboard"),
     path("login/", views.user_login, name="login"),
     path("logout/", views.user_logout, name="logout"),
+    path("profile/", views.profile, name="profile"),
+    path("notifications/", views.NotificationListView.as_view(), name="notification_list"),
+    path("notifications/read-all/", views.notifications_mark_all_read, name="notifications_read_all"),
+    path("notifications/<int:pk>/read/", views.notification_mark_read, name="notification_read"),
     # Equipment
     path("equipment/", views.EquipmentListView.as_view(), name="equipment_list"),
     path("equipment/add/", views.EquipmentCreateView.as_view(), name="equipment_add"),
@@ -37,11 +41,13 @@ urlpatterns = [
     path("orders/add/", views.OrderCreateView.as_view(), name="order_add"),
     path("orders/<int:pk>/edit/", views.OrderUpdateView.as_view(), name="order_edit"),
     path("orders/<int:pk>/delete/", views.OrderDeleteView.as_view(), name="order_delete"),
-    # Movements
-    path("movements/", views.MovementListView.as_view(), name="movement_list"),
-    path("movements/add/", views.MovementCreateView.as_view(), name="movement_add"),
-    path("movements/<int:pk>/edit/", views.MovementUpdateView.as_view(), name="movement_edit"),
-    path("movements/<int:pk>/delete/", views.MovementDeleteView.as_view(), name="movement_delete"),
+    # Audit log (legacy movement URLs redirect here)
+    path("audit/", views.AuditLogListView.as_view(), name="audit_log"),
+    path("audit/<int:pk>/", views.AuditLogDetailView.as_view(), name="audit_detail"),
+    path("movements/", views.legacy_movement_redirect, name="movement_list"),
+    path("movements/add/", views.legacy_movement_redirect, name="movement_add"),
+    path("movements/<int:pk>/edit/", views.legacy_movement_redirect, name="movement_edit"),
+    path("movements/<int:pk>/delete/", views.legacy_movement_redirect, name="movement_delete"),
     # References
     path("refs/equipment-types/", views.EquipmentTypeListView.as_view(), name="eqtype_list"),
     path("refs/equipment-types/add/", views.EquipmentTypeCreateView.as_view(), name="eqtype_add"),
@@ -65,4 +71,7 @@ urlpatterns = [
     path("refs/operators/<int:pk>/delete/", views.OperatorDeleteView.as_view(), name="operator_delete"),
     # Export
     path("export/<str:model_name>/", views.ExportCSVView.as_view(), name="export_csv"),
+    # Data import / export
+    path("export-data/", views.ExportDataView.as_view(), name="export_data"),
+    path("import-data/", views.ImportDataView.as_view(), name="import_data"),
 ]

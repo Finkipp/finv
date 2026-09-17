@@ -1,0 +1,66 @@
+{% extends "inventory/base.html" %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Профиль</h1>
+        <p class="page-subtitle">Личные данные, безопасность и уведомления</p>
+    </div>
+</div>
+
+<div class="profile-layout">
+    <aside class="card profile-summary">
+        {% if current_profile.avatar %}
+        <img src="{{ current_profile.avatar.url }}" alt="Аватар {{ user.username }}" class="profile-avatar-large">
+        {% else %}
+        <div class="profile-avatar-large profile-avatar-placeholder">{{ user.username|first|upper }}</div>
+        {% endif %}
+        <h2>{{ user.get_full_name|default:user.username }}</h2>
+        <p>@{{ user.username }}</p>
+        <span class="role-badge">{{ role_name }}</span>
+        <dl class="profile-facts">
+            <div><dt>Последний вход</dt><dd>{{ user.last_login|date:"d.m.Y H:i"|default:"—" }}</dd></div>
+            <div><dt>Дата регистрации</dt><dd>{{ user.date_joined|date:"d.m.Y" }}</dd></div>
+        </dl>
+    </aside>
+
+    <div class="profile-forms">
+        <div class="form-card">
+            <h2>Основная информация</h2>
+            <form method="post" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="action" value="profile">
+                {% if user_form.non_field_errors or profile_form.non_field_errors %}
+                <div class="alert alert-error">{{ user_form.non_field_errors }}{{ profile_form.non_field_errors }}</div>
+                {% endif %}
+                <div class="form-row">
+                    <div class="form-group"><label for="{{ user_form.first_name.id_for_label }}">{{ user_form.first_name.label }}</label>{{ user_form.first_name }}{{ user_form.first_name.errors }}</div>
+                    <div class="form-group"><label for="{{ user_form.last_name.id_for_label }}">{{ user_form.last_name.label }}</label>{{ user_form.last_name }}{{ user_form.last_name.errors }}</div>
+                </div>
+                <div class="form-group"><label for="{{ user_form.email.id_for_label }}">{{ user_form.email.label }}</label>{{ user_form.email }}{{ user_form.email.errors }}</div>
+                <div class="form-group"><label for="{{ profile_form.avatar.id_for_label }}">{{ profile_form.avatar.label }}</label>{{ profile_form.avatar }}{{ profile_form.avatar.errors }}<div class="field-help">JPG, PNG, GIF или WebP, не более 2 МБ.</div></div>
+                <div class="form-group"><label for="{{ profile_form.notification_level.id_for_label }}">{{ profile_form.notification_level.label }}</label>{{ profile_form.notification_level }}{{ profile_form.notification_level.errors }}<div class="field-help">«Оборудование и расходники» включает также поступления, уходы и списания. Полная подписка включает справочники, заказы и системные события.</div></div>
+                {% if profile_form.notification_level.field.disabled %}<div class="field-help">Настройка доступна пользователям с правом просмотра журнала аудита.</div>{% endif %}
+                <div class="form-actions"><button type="submit" class="btn btn-primary">Сохранить профиль</button></div>
+            </form>
+        </div>
+
+        <div class="form-card">
+            <h2>Смена пароля</h2>
+            <form method="post" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="action" value="password">
+                {% if password_form.non_field_errors %}<div class="alert alert-error">{{ password_form.non_field_errors }}</div>{% endif %}
+                {% for field in password_form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}<div class="field-help password-help">{{ field.help_text|safe }}</div>{% endif %}
+                    {{ field.errors }}
+                </div>
+                {% endfor %}
+                <div class="form-actions"><button type="submit" class="btn btn-primary">Изменить пароль</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

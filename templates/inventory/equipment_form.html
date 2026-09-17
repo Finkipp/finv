@@ -2,80 +2,88 @@
 {% block content %}
 <div class="page-header">
     <h1>{% if form.instance.pk %}✏️ Редактировать{% else %}➕ Добавить{% endif %} оборудование</h1>
-    <a href="{% url 'equipment_list' %}" class="btn btn-outline">← Назад</a>
+    <a href="{% url 'equipment_list' %}" class="btn btn-outline">← Назад к списку</a>
 </div>
 
-<div class="form-card">
-    <form method="post">
+<div class="form-card form-card--equipment">
+    <form method="post" novalidate>
         {% csrf_token %}
-        
+
         {% if form.non_field_errors %}
         <div class="alert alert-error">
             {% for err in form.non_field_errors %}{{ err }}{% endfor %}
         </div>
         {% endif %}
-        
-        <div class="form-row">
-            <div class="form-group">
-                <label>{{ form.equipment_type.label }}</label>
-                {{ form.equipment_type }}
-                {% if form.equipment_type.errors %}
-                <div class="form-error">{{ form.equipment_type.errors.0 }}</div>
-                {% endif %}
-            </div>
-            <div class="form-group">
-                <label>{{ form.name.label }}</label>
-                {{ form.name }}
-                {% if form.name.errors %}
-                <div class="form-error">{{ form.name.errors.0 }}</div>
-                {% endif %}
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group">
-                <label>{{ form.inventory_number.label }}</label>
-                <div style="display:flex; gap:6px;">
-                    {{ form.inventory_number }}
-                    <button type="button" class="btn btn-outline" id="generate-inv" title="Сгенерировать">🎲</button>
+
+        <div class="form-section">
+            <h3>📋 Основная информация</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.equipment_type.id_for_label }}">{{ form.equipment_type.label }}{% if form.equipment_type.field.required %}<span class="required">*</span>{% endif %}</label>
+                    {{ form.equipment_type }}
+                    {% if form.equipment_type.errors %}<div class="form-error">{{ form.equipment_type.errors.0 }}</div>{% endif %}
                 </div>
-                {% if form.inventory_number.errors %}
-                <div class="form-error">{{ form.inventory_number.errors.0 }}</div>
-                {% endif %}
+                <div class="form-group">
+                    <label for="{{ form.name.id_for_label }}">{{ form.name.label }}{% if form.name.field.required %}<span class="required">*</span>{% endif %}</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}<div class="form-error">{{ form.name.errors.0 }}</div>{% endif %}
+                </div>
             </div>
-            <div class="form-group">
-                <label>{{ form.status.label }}</label>
-                {{ form.status }}
-                {% if form.status.errors %}
-                <div class="form-error">{{ form.status.errors.0 }}</div>
-                {% endif %}
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group">
-                <label>{{ form.location.label }}</label>
-                {{ form.location }}
-                {% if form.location.errors %}
-                <div class="form-error">{{ form.location.errors.0 }}</div>
-                {% endif %}
-            </div>
-            <div class="form-group">
-                <label>{{ form.operator.label }}</label>
-                {{ form.operator }}
-                {% if form.operator.errors %}
-                <div class="form-error">{{ form.operator.errors.0 }}</div>
-                {% endif %}
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.inventory_number.id_for_label }}">{{ form.inventory_number.label }}{% if form.inventory_number.field.required %}<span class="required">*</span>{% endif %}</label>
+                    <div class="input-btn-group">
+                        {{ form.inventory_number }}
+                        <button type="button" class="btn btn-outline" id="generate-inv" title="Сгенерировать">🎲</button>
+                    </div>
+                    {% if form.inventory_number.errors %}<div class="form-error">{{ form.inventory_number.errors.0 }}</div>{% endif %}
+                    <div class="field-help">💡 Оставьте пустым для автогенерации</div>
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.status.id_for_label }}">{{ form.status.label }}{% if form.status.field.required %}<span class="required">*</span>{% endif %}</label>
+                    {{ form.status }}
+                    {% if form.status.errors %}<div class="form-error">{{ form.status.errors.0 }}</div>{% endif %}
+                </div>
             </div>
         </div>
-        <div class="form-group">
-            <label>{{ form.description.label }}</label>
-            {{ form.description }}
-            {% if form.description.errors %}
-            <div class="form-error">{{ form.description.errors.0 }}</div>
+
+        <div class="form-section">
+            <h3>📍 Размещение</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.location.id_for_label }}">{{ form.location.label }}</label>
+                    {{ form.location }}
+                    {% if form.location.errors %}<div class="form-error">{{ form.location.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.operator.id_for_label }}">{{ form.operator.label }}</label>
+                    {{ form.operator }}
+                    {% if form.operator.errors %}<div class="form-error">{{ form.operator.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>📝 Описание</h3>
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+                {{ form.description }}
+                {% if form.description.errors %}<div class="form-error">{{ form.description.errors.0 }}</div>{% endif %}
+                <div class="field-help">Дополнительная информация, примечания, характеристики</div>
+            </div>
+            {% if form.instance.pk %}
+            <div class="form-group">
+                <label for="{{ form.change_note.id_for_label }}">{{ form.change_note.label }}</label>
+                {{ form.change_note }}
+                {% if form.change_note.errors %}<div class="form-error">{{ form.change_note.errors.0 }}</div>{% endif %}
+                <div class="field-help">Комментарий попадёт в журнал. При смене статуса «Ремонт» событие будет отмечено отдельно.</div>
+            </div>
             {% endif %}
         </div>
+
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary">💾 Сохранить</button>
             <a href="{% url 'equipment_list' %}" class="btn btn-outline">Отмена</a>
+            <button type="submit" class="btn btn-primary">💾 Сохранить</button>
         </div>
     </form>
 </div>

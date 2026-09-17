@@ -2,55 +2,103 @@
 {% block content %}
 <div class="page-header">
     <h1>{% if form.instance.pk %}✏️ Редактировать{% else %}➕ Добавить{% endif %} уход</h1>
-    <a href="{% url 'disposal_list' %}" class="btn btn-outline">← Назад</a>
+    <a href="{% url 'disposal_list' %}" class="btn btn-outline">← Назад к списку</a>
 </div>
 
-<div class="form-card">
-    <form method="post">
+<div class="form-card form-card--disposal">
+    <form method="post" novalidate>
         {% csrf_token %}
-        
+
         {% if form.non_field_errors %}
         <div class="alert alert-error">
             {% for err in form.non_field_errors %}{{ err }}{% endfor %}
         </div>
         {% endif %}
-        
-        <div class="form-row">
-            <div class="form-group">
-                <label>{{ form.equipment_type.label }}</label>
-                {{ form.equipment_type }}
-                {% if form.equipment_type.errors %}
-                <div class="form-error">{{ form.equipment_type.errors.0 }}</div>
-                {% endif %}
+
+        <div class="form-section">
+            <h3>📋 Информация об уходе</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.date.id_for_label }}">{{ form.date.label }}{% if form.date.field.required %}<span class="required">*</span>{% endif %}</label>
+                    {{ form.date }}
+                    {% if form.date.errors %}<div class="form-error">{{ form.date.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.equipment_type.id_for_label }}">{{ form.equipment_type.label }}{% if form.equipment_type.field.required %}<span class="required">*</span>{% endif %}</label>
+                    {{ form.equipment_type }}
+                    {% if form.equipment_type.errors %}<div class="form-error">{{ form.equipment_type.errors.0 }}</div>{% endif %}
+                </div>
             </div>
-            <div class="form-group">
-                <label>{{ form.name.label }}</label>
-                {{ form.name }}
-                {% if form.name.errors %}
-                <div class="form-error">{{ form.name.errors.0 }}</div>
-                {% endif %}
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.name.id_for_label }}">{{ form.name.label }}{% if form.name.field.required %}<span class="required">*</span>{% endif %}</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}<div class="form-error">{{ form.name.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.quantity.id_for_label }}">{{ form.quantity.label }}{% if form.quantity.field.required %}<span class="required">*</span>{% endif %}</label>
+                    {{ form.quantity }}
+                    {% if form.quantity.errors %}<div class="form-error">{{ form.quantity.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.direction.id_for_label }}">{{ form.direction.label }}</label>
+                    {{ form.direction }}
+                    {% if form.direction.errors %}<div class="form-error">{{ form.direction.errors.0 }}</div>{% endif %}
+                </div>
             </div>
         </div>
-        <div class="form-row">
+
+        {% if not form.instance.pk %}
+        <div class="form-section">
+            <h3>🔗 Привязка к существующей записи</h3>
             <div class="form-group">
-                <label>{{ form.quantity.label }}</label>
-                {{ form.quantity }}
-                {% if form.quantity.errors %}
-                <div class="form-error">{{ form.quantity.errors.0 }}</div>
-                {% endif %}
+                <label for="{{ form.create_target.id_for_label }}">{{ form.create_target.label }}</label>
+                {{ form.create_target }}
+                {% if form.create_target.errors %}<div class="form-error">{{ form.create_target.errors.0 }}</div>{% endif %}
             </div>
-            <div class="form-group">
-                <label>{{ form.direction.label }}</label>
-                {{ form.direction }}
-                {% if form.direction.errors %}
-                <div class="form-error">{{ form.direction.errors.0 }}</div>
-                {% endif %}
+
+            <div id="disposal-help-none" class="field-help" style="margin-top:8px;">
+                💡 Без привязки — запись только в таблице «Уход».
+            </div>
+            <div id="disposal-help-equipment" class="field-help" style="display:none; margin-top:8px;">
+                💡 Будет найдено оборудование с таким же <strong>типом</strong> и <strong>наименованием</strong>.
+                Его статус сменится на «Нерабочий». Направление ухода останется частью документа,
+                но не будет ошибочно создано как местоположение.
+            </div>
+            <div id="disposal-help-consumable" class="field-help" style="display:none; margin-top:8px;">
+                💡 Будет найден расходник с таким же <strong>типом</strong> и <strong>наименованием</strong>.
+                Указанное количество будет вычтено со склада.
             </div>
         </div>
+        {% endif %}
+
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary">💾 Сохранить</button>
             <a href="{% url 'disposal_list' %}" class="btn btn-outline">Отмена</a>
+            <button type="submit" class="btn btn-primary">💾 Сохранить</button>
         </div>
     </form>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    var target = document.getElementById("{{ form.create_target.id_for_label }}");
+    var helpNone = document.getElementById("disposal-help-none");
+    var helpEq = document.getElementById("disposal-help-equipment");
+    var helpCon = document.getElementById("disposal-help-consumable");
+
+    function toggleHelp() {
+        var val = target.value;
+        helpNone.style.display = val === "none" ? "block" : "none";
+        helpEq.style.display = val === "equipment" ? "block" : "none";
+        helpCon.style.display = val === "consumable" ? "block" : "none";
+    }
+
+    if (target) {
+        target.addEventListener("change", toggleHelp);
+        toggleHelp();
+    }
+});
+</script>
 {% endblock %}

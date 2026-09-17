@@ -2,64 +2,164 @@
 {% block content %}
 <div class="page-header">
     <h1>{% if form.instance.pk %}✏️ Редактировать{% else %}➕ Добавить{% endif %} поступление</h1>
-    <a href="{% url 'receipt_list' %}" class="btn btn-outline">← Назад</a>
+    <a href="{% url 'receipt_list' %}" class="btn btn-outline">← Назад к списку</a>
 </div>
 
-<div class="form-card">
-    <form method="post">
+<div class="form-card form-card--receipt">
+    <form method="post" novalidate>
         {% csrf_token %}
-        
+
         {% if form.non_field_errors %}
         <div class="alert alert-error">
             {% for err in form.non_field_errors %}{{ err }}{% endfor %}
         </div>
         {% endif %}
-        
-        <div class="form-row">
-            <div class="form-group">
-                <label>{{ form.equipment_type.label }}</label>
-                {{ form.equipment_type }}
-                {% if form.equipment_type.errors %}
-                <div class="form-error">{{ form.equipment_type.errors.0 }}</div>
-                {% endif %}
+
+        <div class="form-section">
+            <h3>📋 Информация о поступлении</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.date.id_for_label }}">{{ form.date.label }}{% if form.date.field.required %}<span class="required">*</span>{% endif %}</label>
+                    {{ form.date }}
+                    {% if form.date.errors %}<div class="form-error">{{ form.date.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.equipment_type.id_for_label }}">{{ form.equipment_type.label }}{% if form.equipment_type.field.required %}<span class="required">*</span>{% endif %}</label>
+                    {{ form.equipment_type }}
+                    {% if form.equipment_type.errors %}<div class="form-error">{{ form.equipment_type.errors.0 }}</div>{% endif %}
+                </div>
             </div>
-            <div class="form-group">
-                <label>{{ form.name.label }}</label>
-                {{ form.name }}
-                {% if form.name.errors %}
-                <div class="form-error">{{ form.name.errors.0 }}</div>
-                {% endif %}
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.name.id_for_label }}">{{ form.name.label }}{% if form.name.field.required %}<span class="required">*</span>{% endif %}</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}<div class="form-error">{{ form.name.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.quantity.id_for_label }}">{{ form.quantity.label }}{% if form.quantity.field.required %}<span class="required">*</span>{% endif %}</label>
+                    {{ form.quantity }}
+                    {% if form.quantity.errors %}<div class="form-error">{{ form.quantity.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.status.id_for_label }}">{{ form.status.label }}{% if form.status.field.required %}<span class="required">*</span>{% endif %}</label>
+                    {{ form.status }}
+                    {% if form.status.errors %}<div class="form-error">{{ form.status.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.supplier.id_for_label }}">{{ form.supplier.label }}</label>
+                    {{ form.supplier }}
+                    {% if form.supplier.errors %}<div class="form-error">{{ form.supplier.errors.0 }}</div>{% endif %}
+                    <div class="field-help">Укажите поставщика, если он известен</div>
+                </div>
             </div>
         </div>
-        <div class="form-row">
+
+        {% if not form.instance.pk %}
+        <div class="form-section">
+            <h3>📌 Добавить в другую таблицу</h3>
             <div class="form-group">
-                <label>{{ form.status.label }}</label>
-                {{ form.status }}
-                {% if form.status.errors %}
-                <div class="form-error">{{ form.status.errors.0 }}</div>
-                {% endif %}
+                <label for="{{ form.create_target.id_for_label }}">{{ form.create_target.label }}</label>
+                {{ form.create_target }}
+                {% if form.create_target.errors %}<div class="form-error">{{ form.create_target.errors.0 }}</div>{% endif %}
+                <div class="field-help">Создать запись в выбранной таблице на основе данных поступления</div>
             </div>
-            <div class="form-group">
-                <label>{{ form.quantity.label }}</label>
-                {{ form.quantity }}
-                {% if form.quantity.errors %}
-                <div class="form-error">{{ form.quantity.errors.0 }}</div>
-                {% endif %}
+
+            <div id="receipt-fields-equipment" style="display:none;">
+                <div class="form-section" style="border:1px solid var(--border); border-radius:var(--radius-lg); padding:16px; margin-top:12px; border-top-color:var(--primary);">
+                    <h3>💻 Поля оборудования</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="{{ form.eq_inventory_number.id_for_label }}">{{ form.eq_inventory_number.label }}</label>
+                            <div class="input-btn-group">
+                                {{ form.eq_inventory_number }}
+                                <button type="button" class="btn btn-outline" id="generate-inv-eq" title="Сгенерировать">🎲</button>
+                            </div>
+                            {% if form.eq_inventory_number.errors %}<div class="form-error">{{ form.eq_inventory_number.errors.0 }}</div>{% endif %}
+                            <div class="field-help">💡 Оставьте пустым для автогенерации</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.eq_status.id_for_label }}">{{ form.eq_status.label }}</label>
+                            {{ form.eq_status }}
+                            {% if form.eq_status.errors %}<div class="form-error">{{ form.eq_status.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="{{ form.eq_location.id_for_label }}">{{ form.eq_location.label }}</label>
+                            {{ form.eq_location }}
+                            {% if form.eq_location.errors %}<div class="form-error">{{ form.eq_location.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.eq_operator.id_for_label }}">{{ form.eq_operator.label }}</label>
+                            {{ form.eq_operator }}
+                            {% if form.eq_operator.errors %}<div class="form-error">{{ form.eq_operator.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.eq_description.id_for_label }}">{{ form.eq_description.label }}</label>
+                        {{ form.eq_description }}
+                        {% if form.eq_description.errors %}<div class="form-error">{{ form.eq_description.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div id="receipt-fields-consumable" style="display:none;">
+                <div class="form-section" style="border:1px solid var(--border); border-radius:var(--radius-lg); padding:16px; margin-top:12px; border-top-color:var(--success);">
+                    <h3>📦 Поля расходника</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="{{ form.con_status.id_for_label }}">{{ form.con_status.label }}</label>
+                            {{ form.con_status }}
+                            {% if form.con_status.errors %}<div class="form-error">{{ form.con_status.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.con_location.id_for_label }}">{{ form.con_location.label }}</label>
+                            {{ form.con_location }}
+                            {% if form.con_location.errors %}<div class="form-error">{{ form.con_location.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="form-row">
-            <div class="form-group">
-                <label>{{ form.supplier.label }}</label>
-                {{ form.supplier }}
-                {% if form.supplier.errors %}
-                <div class="form-error">{{ form.supplier.errors.0 }}</div>
-                {% endif %}
-            </div>
-        </div>
+        {% endif %}
+
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary">💾 Сохранить</button>
             <a href="{% url 'receipt_list' %}" class="btn btn-outline">Отмена</a>
+            <button type="submit" class="btn btn-primary">💾 Сохранить</button>
         </div>
     </form>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    var target = document.getElementById("{{ form.create_target.id_for_label }}");
+    var eqBlock = document.getElementById("receipt-fields-equipment");
+    var conBlock = document.getElementById("receipt-fields-consumable");
+
+    function toggleFields() {
+        var val = target.value;
+        eqBlock.style.display = val === "equipment" ? "block" : "none";
+        conBlock.style.display = val === "consumable" ? "block" : "none";
+    }
+
+    if (target) {
+        target.addEventListener("change", toggleFields);
+        toggleFields();
+    }
+
+    var genBtn = document.getElementById("generate-inv-eq");
+    if (genBtn) {
+        genBtn.addEventListener("click", function () {
+            fetch("/equipment/generate-inv/")
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    var input = document.getElementById("{{ form.eq_inventory_number.id_for_label }}");
+                    if (input) input.value = data.inventory_number;
+                });
+        });
+    }
+});
+</script>
 {% endblock %}

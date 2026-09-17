@@ -43,15 +43,12 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo [..] Checking superuser...
-python manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(username='admin').exists() or User.objects.create_superuser('admin', 'admin@example.com', 'admin123')" >nul 2>&1
-
 echo.
 echo ============================================
 echo   Server:  http://127.0.0.1:8000
 echo   Admin:   http://127.0.0.1:8000/admin/
-echo   Login:   admin
-echo   Pass:    admin123
+echo   Create an administrator if needed:
+echo   python manage.py createsuperuser
 echo   Stop:    Ctrl+C
 echo ============================================
 echo.
