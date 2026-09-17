@@ -2,7 +2,7 @@
 {% block content %}
 <div class="page-header">
     <h1>📋 {{ ref_name }}</h1>
-    {% if user.is_staff or perms.inventory.change_equipment %}
+    {% if can_add %}
     <a href="{% url ref_url|add:'_add' %}" class="btn btn-primary">+ Добавить</a>
     {% endif %}
 </div>
@@ -22,10 +22,10 @@
                     <td>{{ item }}</td>
                     <td>
                         <div class="btn-group">
-                            {% if user.is_staff or perms.inventory.change_equipment %}
+                            {% if can_change %}
                             <a href="{% url ref_url|add:'_edit' item.pk %}" class="btn btn-sm btn-outline">✏️</a>
                             {% endif %}
-                            {% if user.is_staff %}
+                            {% if can_delete %}
                             <a href="{% url ref_url|add:'_delete' item.pk %}" class="btn btn-sm btn-danger">🗑️</a>
                             {% endif %}
                         </div>

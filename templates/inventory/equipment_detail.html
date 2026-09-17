@@ -3,7 +3,7 @@
 <div class="page-header">
     <h1>💻 {{ eq.name }}</h1>
     <div class="btn-group">
-        {% if user.is_staff or perms.inventory.change_equipment %}
+        {% if perms.inventory.change_equipment %}
         <a href="{% url 'equipment_edit' eq.pk %}" class="btn btn-primary">✏️ Редактировать</a>
         {% endif %}
         <a href="{% url 'equipment_list' %}" class="btn btn-outline">← Назад</a>
@@ -44,4 +44,22 @@
     </div>
     {% endif %}
 </div>
+
+{% if audit_events %}
+<div class="card">
+    <div class="section-heading">
+        <h2 class="card-title">Последние изменения</h2>
+        <a href="{% url 'audit_log' %}?object_type=equipment&q={{ eq.inventory_number|urlencode }}" class="btn btn-sm btn-outline">Весь журнал</a>
+    </div>
+    <div class="compact-audit-list">
+        {% for event in audit_events %}
+        <a href="{% url 'audit_detail' event.pk %}">
+            <span class="audit-badge audit-{{ event.action }}">{{ event.get_action_display }}</span>
+            <span>{{ event.note|default:event.object_repr }}</span>
+            <time>{{ event.created_at|date:"d.m.Y H:i" }}</time>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
 {% endblock %}

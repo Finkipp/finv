@@ -2,17 +2,25 @@
 {% block content %}
 <div class="page-header">
     <h1>📤 Уход</h1>
-    {% if user.is_staff or perms.inventory.change_equipment %}
-    <a href="{% url 'disposal_add' %}" class="btn btn-primary">+ Добавить</a>
-    {% endif %}
+    <div class="page-actions">
+        {% if perms.inventory.add_disposal %}
+        <a href="{% url 'disposal_add' %}" class="btn btn-primary">+ Добавить</a>
+        {% endif %}
+    </div>
 </div>
 
 <div class="card">
-    <form method="get" style="margin-bottom: 16px;">
-        <div class="search-bar">
-            <input type="text" name="q" class="form-control" placeholder="Поиск..." value="{{ q }}" data-search>
+    <div class="toolbar">
+        <form method="get" class="search-bar">
+            <input type="text" name="q" class="form-control" placeholder="Поиск..." value="{{ q }}">
+            <button type="submit" class="btn btn-primary btn-search">🔍</button>
+        </form>
+        <div class="btn-group">
+            <button class="btn btn-outline" onclick="window.print()">🖨️ Печать</button>
+            <a href="{% url 'export_csv' 'disposal' %}" class="btn btn-outline">📥 Экспорт</a>
         </div>
-    </form>
+    </div>
+
     <div class="table-wrapper">
         <table>
             <thead>
@@ -35,10 +43,10 @@
                     <td>{{ d.direction|default:"—" }}</td>
                     <td>
                         <div class="btn-group">
-                            {% if user.is_staff or perms.inventory.change_equipment %}
+                            {% if perms.inventory.change_disposal %}
                             <a href="{% url 'disposal_edit' d.pk %}" class="btn btn-sm btn-outline">✏️</a>
                             {% endif %}
-                            {% if user.is_staff %}
+                            {% if perms.inventory.delete_disposal %}
                             <a href="{% url 'disposal_delete' d.pk %}" class="btn btn-sm btn-danger">🗑️</a>
                             {% endif %}
                         </div>
@@ -50,16 +58,17 @@
             </tbody>
         </table>
     </div>
+
     {% if page_obj.paginator.num_pages > 1 %}
     <div class="pagination">
         {% if page_obj.has_previous %}
-        <a href="?page=1{% if q %}&q={{ q }}{% endif %}">&laquo;</a>
-        <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}">&lsaquo;</a>
+        <a href="?page=1{% if q %}&q={{ q|urlencode }}{% endif %}">&laquo;</a>
+        <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}">&lsaquo;</a>
         {% endif %}
         <span class="current">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
         {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}">&rsaquo;</a>
-        <a href="?page={{ page_obj.paginator.num_pages }}{% if q %}&q={{ q }}{% endif %}">&raquo;</a>
+        <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}">&rsaquo;</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}{% if q %}&q={{ q|urlencode }}{% endif %}">&raquo;</a>
         {% endif %}
     </div>
     {% endif %}

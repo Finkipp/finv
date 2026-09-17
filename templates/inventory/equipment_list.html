@@ -2,19 +2,73 @@
 {% block content %}
 <div class="page-header">
     <h1>💻 Оборудование</h1>
-    <div class="btn-group">
-        {% if user.is_staff or perms.inventory.change_equipment %}
+    <div class="page-actions">
+        {% if perms.inventory.add_equipment %}
         <a href="{% url 'equipment_add' %}" class="btn btn-primary">+ Добавить</a>
         {% endif %}
     </div>
 </div>
 
 <div class="card">
-    <form method="get" style="margin-bottom: 16px;">
-        <div class="search-bar">
-            <input type="text" name="q" class="form-control" placeholder="Поиск по номеру, наименованию, помещению..." value="{{ q }}" data-search>
+    <div class="toolbar">
+        <form method="get" class="search-bar">
+            <input type="text" name="q" class="form-control" placeholder="Поиск по номеру, наименованию, помещению..." value="{{ q }}">
+            <button type="submit" class="btn btn-primary btn-search">🔍</button>
+        </form>
+        <div class="toolbar-right">
+            <div class="filter-dropdown">
+                <button type="button" class="btn btn-outline" id="filter-toggle">
+                    🔽 Фильтры
+                    {% if filter_status or filter_equipment_type or filter_location %}
+                    <span class="filter-active-dot"></span>
+                    {% endif %}
+                </button>
+                <div class="filter-dropdown-menu" id="filter-menu">
+                    <form method="get">
+                        <input type="hidden" name="q" value="{{ q }}">
+                        <div class="filter-group">
+                            <label>Статус</label>
+                            <select name="status" class="form-control">
+                                <option value="">Все</option>
+                                {% for val, label in statuses %}
+                                <option value="{{ val }}" {% if filter_status == val %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Тип</label>
+                            <select name="equipment_type" class="form-control">
+                                <option value="">Все</option>
+                                {% for t in equipment_types %}
+                                <option value="{{ t.pk }}" {% if filter_equipment_type == t.pk|slugify %}selected{% endif %}>{{ t.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Местоположение</label>
+                            <select name="location" class="form-control">
+                                <option value="">Все</option>
+                                {% for l in locations %}
+                                <option value="{{ l.pk }}" {% if filter_location == l.pk|slugify %}selected{% endif %}>{{ l.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="filter-dropdown-actions">
+                            <button type="submit" class="btn btn-primary btn-sm">Применить</button>
+                            {% if filter_status or filter_equipment_type or filter_location %}
+                            <a href="{% url 'equipment_list' %}" class="btn btn-outline btn-sm">Сбросить</a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button type="button" class="btn btn-outline" onclick="window.print()">🖨️ Печать</button>
+                <a href="{% url 'export_csv' 'equipment' %}" class="btn btn-outline">📥 Экспорт</a>
+            </div>
         </div>
-    </form>
+    </div>
+
     <div class="table-wrapper">
         <table>
             <thead>
@@ -39,10 +93,10 @@
                     <td>{{ eq.operator|default:"—" }}</td>
                     <td>
                         <div class="btn-group">
-                            {% if user.is_staff or perms.inventory.change_equipment %}
+                            {% if perms.inventory.change_equipment %}
                             <a href="{% url 'equipment_edit' eq.pk %}" class="btn btn-sm btn-outline">✏️</a>
                             {% endif %}
-                            {% if user.is_staff %}
+                            {% if perms.inventory.delete_equipment %}
                             <a href="{% url 'equipment_delete' eq.pk %}" class="btn btn-sm btn-danger">🗑️</a>
                             {% endif %}
                         </div>
@@ -54,16 +108,17 @@
             </tbody>
         </table>
     </div>
+
     {% if page_obj.paginator.num_pages > 1 %}
     <div class="pagination">
         {% if page_obj.has_previous %}
-        <a href="?page=1{% if q %}&q={{ q }}{% endif %}">&laquo;</a>
-        <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}">&lsaquo;</a>
+        <a href="?page=1{% if q %}&q={{ q|urlencode }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}{% if filter_equipment_type %}&equipment_type={{ filter_equipment_type }}{% endif %}{% if filter_location %}&location={{ filter_location }}{% endif %}">&laquo;</a>
+        <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}{% if filter_equipment_type %}&equipment_type={{ filter_equipment_type }}{% endif %}{% if filter_location %}&location={{ filter_location }}{% endif %}">&lsaquo;</a>
         {% endif %}
         <span class="current">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
         {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}">&rsaquo;</a>
-        <a href="?page={{ page_obj.paginator.num_pages }}{% if q %}&q={{ q }}{% endif %}">&raquo;</a>
+        <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}{% if filter_equipment_type %}&equipment_type={{ filter_equipment_type }}{% endif %}{% if filter_location %}&location={{ filter_location }}{% endif %}">&rsaquo;</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}{% if q %}&q={{ q|urlencode }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}{% if filter_equipment_type %}&equipment_type={{ filter_equipment_type }}{% endif %}{% if filter_location %}&location={{ filter_location }}{% endif %}">&raquo;</a>
         {% endif %}
     </div>
     {% endif %}

@@ -2,17 +2,26 @@
 {% block content %}
 <div class="page-header">
     <h1>📦 Расходники</h1>
-    {% if user.is_staff or perms.inventory.change_equipment %}
-    <a href="{% url 'consumable_add' %}" class="btn btn-primary">+ Добавить</a>
-    {% endif %}
+    <div class="page-actions">
+        {% if perms.inventory.add_consumable %}
+        <a href="{% url 'consumable_add' %}" class="btn btn-primary">+ Добавить</a>
+        {% endif %}
+    </div>
 </div>
 
 <div class="card">
-    <form method="get" style="margin-bottom: 16px;">
-        <div class="search-bar">
-            <input type="text" name="q" class="form-control" placeholder="Поиск..." value="{{ q }}" data-search>
+    <div class="toolbar">
+        <form method="get" class="search-bar">
+            <input type="text" name="q" class="form-control" placeholder="Поиск по наименованию, типу, местоположению..." value="{{ q }}">
+            <button type="submit" class="btn btn-primary btn-search">🔍</button>
+        </form>
+        <div class="btn-group">
+            <button class="btn btn-outline" onclick="window.print()">🖨️ Печать</button>
+            <a href="{% url 'export_csv' 'consumable' %}" class="btn btn-outline">📥 Экспорт</a>
         </div>
-    </form>
+    </div>
+
+    {% if q %}
     <div class="table-wrapper">
         <table>
             <thead>
@@ -20,6 +29,7 @@
                     <th>Наименование</th>
                     <th>Тип</th>
                     <th>Количество</th>
+                    <th>Статус</th>
                     <th>Местоположение</th>
                     <th>Действия</th>
                 </tr>
@@ -30,35 +40,85 @@
                     <td>{{ c.name }}</td>
                     <td>{{ c.equipment_type }}</td>
                     <td>{{ c.quantity }}</td>
+                    <td><span class="badge badge-{{ c.status }}">{{ c.get_status_display }}</span></td>
                     <td>{{ c.location|default:"—" }}</td>
                     <td>
                         <div class="btn-group">
-                            {% if user.is_staff or perms.inventory.change_equipment %}
+                            {% if perms.inventory.change_consumable %}
                             <a href="{% url 'consumable_edit' c.pk %}" class="btn btn-sm btn-outline">✏️</a>
                             {% endif %}
-                            {% if user.is_staff %}
+                            {% if perms.inventory.delete_consumable %}
                             <a href="{% url 'consumable_delete' c.pk %}" class="btn btn-sm btn-danger">🗑️</a>
                             {% endif %}
                         </div>
                     </td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="5" style="text-align:center; color:var(--text-muted);">Нет записей</td></tr>
+                <tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Нет записей</td></tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+    {% else %}
+    <div class="folder-structure">
+        {% for type, items in groups %}
+        <details class="folder-group" data-folder-key="{{ type.pk }}" open>
+            <summary class="folder-header">
+                <span class="folder-icon">📁</span>
+                <span class="folder-name">{{ type.name }}</span>
+                <span class="folder-count">{{ items|length }}</span>
+            </summary>
+            <div class="folder-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Наименование</th>
+                            <th>Количество</th>
+                            <th>Статус</th>
+                            <th>Местоположение</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in items %}
+                        <tr>
+                            <td>{{ c.name }}</td>
+                            <td>{{ c.quantity }}</td>
+                            <td><span class="badge badge-{{ c.status }}">{{ c.get_status_display }}</span></td>
+                            <td>{{ c.location|default:"—" }}</td>
+                            <td>
+                                <div class="btn-group">
+                                    {% if perms.inventory.change_consumable %}
+                                    <a href="{% url 'consumable_edit' c.pk %}" class="btn btn-sm btn-outline">✏️</a>
+                                    {% endif %}
+                                    {% if perms.inventory.delete_consumable %}
+                                    <a href="{% url 'consumable_delete' c.pk %}" class="btn btn-sm btn-danger">🗑️</a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5" style="text-align:center; color:var(--text-muted);">Нет записей</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </details>
+        {% empty %}
+        <div class="empty-state">
+            <div class="empty-icon">📦</div>
+            <h3>Расходники не найдены</h3>
+            <p>Добавьте первый расходник, нажав кнопку «+ Добавить»</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     {% if page_obj.paginator.num_pages > 1 %}
     <div class="pagination">
-        {% if page_obj.has_previous %}
-        <a href="?page=1{% if q %}&q={{ q }}{% endif %}">&laquo;</a>
-        <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}">&lsaquo;</a>
-        {% endif %}
+        {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}">Назад</a>{% endif %}
         <span class="current">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
-        {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}">&rsaquo;</a>
-        <a href="?page={{ page_obj.paginator.num_pages }}{% if q %}&q={{ q }}{% endif %}">&raquo;</a>
-        {% endif %}
+        {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}">Далее</a>{% endif %}
     </div>
     {% endif %}
 </div>
