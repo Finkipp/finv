@@ -2,63 +2,33 @@
 {% block content %}
 <div class="page-header">
     <h1>{% if form.instance.pk %}✏️ Редактировать{% else %}➕ Добавить{% endif %} расходник</h1>
-    <a href="{% url 'consumable_list' %}" class="btn btn-outline">← Назад к списку</a>
+    <a href="{% url 'consumable_list' %}" class="btn btn-outline">← Назад</a>
 </div>
 
-<div class="form-card form-card--consumable">
-    <form method="post" novalidate>
+<div class="card">
+    <form method="post">
         {% csrf_token %}
-
-        {% if form.non_field_errors %}
-        <div class="alert alert-error">
-            {% for err in form.non_field_errors %}{{ err }}{% endfor %}
-        </div>
-        {% endif %}
-
-        <div class="form-section">
-            <h3>📋 Основная информация</h3>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="{{ form.equipment_type.id_for_label }}">{{ form.equipment_type.label }}{% if form.equipment_type.field.required %}<span class="required">*</span>{% endif %}</label>
-                    {{ form.equipment_type }}
-                    {% if form.equipment_type.errors %}<div class="form-error">{{ form.equipment_type.errors.0 }}</div>{% endif %}
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.name.id_for_label }}">{{ form.name.label }}{% if form.name.field.required %}<span class="required">*</span>{% endif %}</label>
-                    {{ form.name }}
-                    {% if form.name.errors %}<div class="form-error">{{ form.name.errors.0 }}</div>{% endif %}
-                </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>{{ form.equipment_type.label }}</label>
+                {{ form.equipment_type }}
+            </div>
+            <div class="form-group">
+                <label>{{ form.name.label }}</label>
+                {{ form.name }}
             </div>
         </div>
-
-        <div class="form-section">
-            <h3>📦 Учёт</h3>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="{{ form.quantity.id_for_label }}">{{ form.quantity.label }}{% if form.quantity.field.required %}<span class="required">*</span>{% endif %}</label>
-                    {{ form.quantity }}
-                    {% if form.quantity.errors %}<div class="form-error">{{ form.quantity.errors.0 }}</div>{% endif %}
-                    <div class="field-help">Количество единиц на складе</div>
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.status.id_for_label }}">{{ form.status.label }}{% if form.status.field.required %}<span class="required">*</span>{% endif %}</label>
-                    {{ form.status }}
-                    {% if form.status.errors %}<div class="form-error">{{ form.status.errors.0 }}</div>{% endif %}
-                </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>{{ form.quantity.label }}</label>
+                {{ form.quantity }}
             </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="{{ form.location.id_for_label }}">{{ form.location.label }}</label>
-                    {{ form.location }}
-                    {% if form.location.errors %}<div class="form-error">{{ form.location.errors.0 }}</div>{% endif %}
-                </div>
+            <div class="form-group">
+                <label>{{ form.location.label }}</label>
+                {{ form.location }}
             </div>
         </div>
-
-        <div class="form-actions">
-            <a href="{% url 'consumable_list' %}" class="btn btn-outline">Отмена</a>
-            <button type="submit" class="btn btn-primary">💾 Сохранить</button>
-        </div>
+        <button type="submit" class="btn btn-primary">💾 Сохранить</button>
     </form>
 </div>
 {% endblock %}
